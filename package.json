@@ -49,6 +49,7 @@
     "date-fns": "latest",
     "embla-carousel-react": "8.5.1",
     "firebase": "latest",
+    "firebase-admin": "^13.3.0",
     "framer-motion": "^12.10.0",
     "input-otp": "1.4.1",
     "jspdf": "latest",

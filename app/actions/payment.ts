@@ -1,13 +1,12 @@
 "use server"
 
 import { getStripeServer } from "@/lib/stripe"
-import { getFirestore } from "firebase-admin/firestore"
-import { initializeApp, getApps, cert } from "firebase-admin/app"
+import * as admin from 'firebase-admin'
 
 // Initialize Firebase Admin if not already initialized
-if (getApps().length === 0) {
-  initializeApp({
-    credential: cert({
+if (admin.apps.length === 0) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
       projectId: process.env.FIREBASE_PROJECT_ID,
       clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
       privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
@@ -15,7 +14,7 @@ if (getApps().length === 0) {
   })
 }
 
-const db = getFirestore()
+const db = admin.firestore()
 
 export async function createCheckoutSession(
   projectId: string,

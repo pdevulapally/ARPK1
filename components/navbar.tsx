@@ -49,9 +49,16 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center">
-            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-purple-600">
-              ARPK
-            </span>
+            <img
+              src="/Images/ARPK_Logo.png"
+              alt="ARPK Logo"
+              className="h-20 w-auto" // Adjust height as needed
+              style={{
+                filter: isScrolled ? 'brightness(1)' : 'brightness(1.2)', // Optional: adjust logo brightness based on scroll
+                transition: 'filter 0.3s ease'
+              }}
+            />
+            <span className="sr-only">ARPK</span> {/* For accessibility */}
           </Link>
 
           {/* Desktop Navigation */}

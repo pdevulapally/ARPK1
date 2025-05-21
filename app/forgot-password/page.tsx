@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { getAuth, sendPasswordResetEmail } from "firebase/auth"
+import { getAuth, sendPasswordResetEmail, fetchSignInMethodsForEmail } from "firebase/auth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -23,6 +23,20 @@ export default function ForgotPasswordPage() {
     setIsLoading(true)
 
     try {
+      // Check if user exists
+      const signInMethods = await fetchSignInMethodsForEmail(auth, email)
+      
+      if (signInMethods.length === 0) {
+        // No user found with this email
+        toast({
+          title: "Account Not Found",
+          description: "No account exists with this email address. Please check the email or create a new account.",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // User exists, send reset email
       await sendPasswordResetEmail(auth, email)
       toast({
         title: "Reset Email Sent",
@@ -31,9 +45,17 @@ export default function ForgotPasswordPage() {
       router.push("/login")
     } catch (error: any) {
       console.error("Password reset error:", error)
+      
+      // Handle specific Firebase errors
+      const errorMessage = error.code === 'auth/invalid-email' 
+        ? "Please enter a valid email address"
+        : error.code === 'auth/too-many-requests'
+        ? "Too many attempts. Please try again later"
+        : "Failed to send reset email. Please try again."
+
       toast({
         title: "Reset Failed",
-        description: error.message || "Failed to send reset email. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       })
     } finally {

@@ -52,14 +52,14 @@ export default function PricingPage() {
       lowercaseDesc.includes("simple") ||
       lowercaseDesc.includes("basic")
     ) {
-      return "Based on your description, I recommend our **Simple Website** plan (£100-£200). This is perfect for your portfolio or landing page needs, and we can deliver it in 2-4 days."
+      return "Based on your description, I recommend our **Simple Website** plan (£100-£200). This is perfect for your portfolio or landing page needs, and we can deliver it in 2-4 weeks."
     } else if (
       lowercaseDesc.includes("blog") ||
       lowercaseDesc.includes("contact form") ||
       lowercaseDesc.includes("medium") ||
       lowercaseDesc.includes("business")
     ) {
-      return "Your project sounds like a good fit for our **Medium Website** plan (£250-£400). This includes custom animations and contact forms, and we can deliver it in 5-7 days."
+      return "Your project sounds like a good fit for our **Medium Website** plan (£250-£400). This includes custom animations and contact forms, and we can deliver it in 5-7 weeks."
     } else if (
       lowercaseDesc.includes("login") ||
       lowercaseDesc.includes("dashboard") ||
@@ -69,7 +69,7 @@ export default function PricingPage() {
       lowercaseDesc.includes("e-commerce") ||
       lowercaseDesc.includes("payment")
     ) {
-      return "Your project requires our **Complex Website** plan (£500-£1000+). This includes login systems, dashboards, and admin panels. We can deliver it in 10-20 days depending on the complexity."
+      return "Your project requires our **Complex Website** plan (£500-£1000+). This includes login systems, dashboards, and admin panels. We can deliver it in 10-20 weeks depending on the complexity."
     } else {
       return "I need a bit more information to make a recommendation. Could you tell me more about the number of pages you need, any special features (like login systems, forms, or e-commerce), and your timeline?"
     }
@@ -137,7 +137,7 @@ export default function PricingPage() {
                 </li>
                 <li className="flex items-start">
                   <Check className="h-5 w-5 text-green-500 mr-2 shrink-0 mt-0.5" />
-                  <span>Time: ~2–4 days</span>
+                  <span>Time: ~2–4 weeks</span>
                 </li>
               </ul>
             </CardContent>
@@ -174,7 +174,7 @@ export default function PricingPage() {
                 </li>
                 <li className="flex items-start">
                   <Check className="h-5 w-5 text-yellow-500 mr-2 shrink-0 mt-0.5" />
-                  <span>Time: ~5–7 days</span>
+                  <span>Time: ~5–7 weeks</span>
                 </li>
               </ul>
             </CardContent>
@@ -211,7 +211,7 @@ export default function PricingPage() {
                 </li>
                 <li className="flex items-start">
                   <Check className="h-5 w-5 text-red-500 mr-2 shrink-0 mt-0.5" />
-                  <span>Time: ~10–20 days</span>
+                  <span>Time: ~10–20 weeks</span>
                 </li>
               </ul>
             </CardContent>
@@ -485,8 +485,8 @@ export default function PricingPage() {
                 <div className="space-y-2">
                   <h3 className="text-lg font-medium">How long does the process take?</h3>
                   <p className="text-gray-300">
-                    Timelines vary by project complexity: Simple websites (2-4 days), Medium websites (5-7 days), and
-                    Complex websites (10-20 days).
+                    Timelines vary by project complexity: Simple websites (2-4 weeks), Medium websites (5-7 weeks), and
+                    Complex websites (10-20 weeks).
                   </p>
                 </div>
                 <div className="space-y-2">

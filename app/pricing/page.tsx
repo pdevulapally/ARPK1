@@ -7,73 +7,15 @@ import { motion } from "framer-motion"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Textarea } from "@/components/ui/textarea"
-import { Check, X, AlertTriangle, Loader2 } from "lucide-react"
+import { Check, X, AlertTriangle } from "lucide-react"
 import Link from "next/link"
 import { useInView } from "framer-motion"
 
 export default function PricingPage() {
-  const [aiLoading, setAiLoading] = useState(false)
-  const [aiResponse, setAiResponse] = useState("")
-  const [projectDescription, setProjectDescription] = useState("")
-
   const comparisonRef = useRef(null)
   const quoteRef = useRef(null)
   const isComparisonInView = useInView(comparisonRef, { once: true, amount: 0.3 })
   const isQuoteInView = useInView(quoteRef, { once: true, amount: 0.3 })
-
-  const handleAiSuggestion = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setAiLoading(true)
-
-    try {
-      // In a real implementation, this would call an API endpoint that uses Groq AI
-      // For now, we'll simulate the AI response
-      const response = await simulateAiResponse(projectDescription)
-      setAiResponse(response)
-    } catch (error) {
-      console.error("Error getting AI suggestion:", error)
-      setAiResponse("Sorry, there was an error processing your request. Please try again.")
-    } finally {
-      setAiLoading(false)
-    }
-  }
-
-  // This simulates what would normally be an API call to Groq AI
-  const simulateAiResponse = async (description: string): Promise<string> => {
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-
-    const lowercaseDesc = description.toLowerCase()
-
-    if (
-      lowercaseDesc.includes("portfolio") ||
-      lowercaseDesc.includes("landing page") ||
-      lowercaseDesc.includes("simple") ||
-      lowercaseDesc.includes("basic")
-    ) {
-      return "Based on your description, I recommend our **Simple Website** plan (£100-£200). This is perfect for your portfolio or landing page needs, and we can deliver it in 2-4 weeks."
-    } else if (
-      lowercaseDesc.includes("blog") ||
-      lowercaseDesc.includes("contact form") ||
-      lowercaseDesc.includes("medium") ||
-      lowercaseDesc.includes("business")
-    ) {
-      return "Your project sounds like a good fit for our **Medium Website** plan (£250-£400). This includes custom animations and contact forms, and we can deliver it in 5-7 weeks."
-    } else if (
-      lowercaseDesc.includes("login") ||
-      lowercaseDesc.includes("dashboard") ||
-      lowercaseDesc.includes("admin") ||
-      lowercaseDesc.includes("complex") ||
-      lowercaseDesc.includes("ecommerce") ||
-      lowercaseDesc.includes("e-commerce") ||
-      lowercaseDesc.includes("payment")
-    ) {
-      return "Your project requires our **Complex Website** plan (£500-£1000+). This includes login systems, dashboards, and admin panels. We can deliver it in 10-20 weeks depending on the complexity."
-    } else {
-      return "I need a bit more information to make a recommendation. Could you tell me more about the number of pages you need, any special features (like login systems, forms, or e-commerce), and your timeline?"
-    }
-  }
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
@@ -137,7 +79,7 @@ export default function PricingPage() {
                 </li>
                 <li className="flex items-start">
                   <Check className="h-5 w-5 text-green-500 mr-2 shrink-0 mt-0.5" />
-                  <span>Time: ~2–4 weeks</span>
+                  <span>Time: ~2–4 days</span>
                 </li>
               </ul>
             </CardContent>
@@ -174,7 +116,7 @@ export default function PricingPage() {
                 </li>
                 <li className="flex items-start">
                   <Check className="h-5 w-5 text-yellow-500 mr-2 shrink-0 mt-0.5" />
-                  <span>Time: ~5–7 weeks</span>
+                  <span>Time: ~5–7 days</span>
                 </li>
               </ul>
             </CardContent>
@@ -211,7 +153,7 @@ export default function PricingPage() {
                 </li>
                 <li className="flex items-start">
                   <Check className="h-5 w-5 text-red-500 mr-2 shrink-0 mt-0.5" />
-                  <span>Time: ~10–20 weeks</span>
+                  <span>Time: ~10–20 days</span>
                 </li>
               </ul>
             </CardContent>
@@ -223,87 +165,6 @@ export default function PricingPage() {
           </Card>
         </motion.div>
       </motion.div>
-
-      {/* AI Plan Suggester */}
-      <div className="mb-20">
-        <Card className="border border-purple-500/30 bg-black/60 backdrop-blur-md">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold flex items-center">
-              <span className="bg-purple-600 text-white p-1 rounded-md mr-2 text-sm">AI</span>
-              Not sure which plan is right for you?
-            </CardTitle>
-            <CardDescription>
-              Tell us about your project and our AI assistant will recommend the best plan for you.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleAiSuggestion} className="space-y-4">
-              <Textarea
-                placeholder="Describe your project: type of site, number of pages, special features, timeline..."
-                className="min-h-[120px] bg-black/50 border-purple-500/30 focus:border-purple-500"
-                value={projectDescription}
-                onChange={(e) => setProjectDescription(e.target.value)}
-                required
-              />
-              <Button
-                type="submit"
-                className="w-full bg-purple-600 hover:bg-purple-700"
-                disabled={aiLoading || projectDescription.trim().length < 10}
-              >
-                {aiLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing your project...
-                  </>
-                ) : (
-                  "Get AI Recommendation"
-                )}
-              </Button>
-            </form>
-
-            {aiResponse && (
-              <div className="mt-6 p-4 rounded-lg bg-purple-900/20 border border-purple-500/30">
-                <h3 className="font-medium text-lg mb-2">Our Recommendation:</h3>
-                <div
-                  className="text-gray-200"
-                  dangerouslySetInnerHTML={{
-                    __html: aiResponse.replace(/\*\*(.*?)\*\*/g, '<span class="font-bold text-purple-400">$1</span>'),
-                  }}
-                />
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Discount Section */}
-      <div className="mb-20">
-        <Card className="border border-purple-500/30 bg-black/60 backdrop-blur-md overflow-hidden">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold">Special Discounts</CardTitle>
-            <CardDescription>We offer special pricing for the following groups</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-black/40 border border-purple-500/20 rounded-lg p-4 hover:border-purple-500/50 transition-all">
-                <h3 className="text-lg font-medium mb-2">Students</h3>
-                <p className="text-gray-300 mb-2">20% off any plan with valid student ID</p>
-                <div className="text-2xl font-bold text-purple-400">20% OFF</div>
-              </div>
-              <div className="bg-black/40 border border-purple-500/20 rounded-lg p-4 hover:border-purple-500/50 transition-all">
-                <h3 className="text-lg font-medium mb-2">Startups</h3>
-                <p className="text-gray-300 mb-2">15% off for registered startups under 2 years old</p>
-                <div className="text-2xl font-bold text-purple-400">15% OFF</div>
-              </div>
-              <div className="bg-black/40 border border-purple-500/20 rounded-lg p-4 hover:border-purple-500/50 transition-all">
-                <h3 className="text-lg font-medium mb-2">Non-Profits</h3>
-                <p className="text-gray-300 mb-2">25% off for registered non-profit organizations</p>
-                <div className="text-2xl font-bold text-purple-400">25% OFF</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Comparison Section */}
       <motion.div
@@ -485,8 +346,8 @@ export default function PricingPage() {
                 <div className="space-y-2">
                   <h3 className="text-lg font-medium">How long does the process take?</h3>
                   <p className="text-gray-300">
-                    Timelines vary by project complexity: Simple websites (2-4 weeks), Medium websites (5-7 weeks), and
-                    Complex websites (10-20 weeks).
+                    Timelines vary by project complexity: Simple websites (2-4 days), Medium websites (5-7 days), and
+                    Complex websites (10-20 days).
                   </p>
                 </div>
                 <div className="space-y-2">

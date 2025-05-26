@@ -79,7 +79,7 @@ export default function PricingPage() {
                 </li>
                 <li className="flex items-start">
                   <Check className="h-5 w-5 text-green-500 mr-2 shrink-0 mt-0.5" />
-                  <span>Time: ~2–4 days</span>
+                  <span>Time: ~2–4 weeks</span>
                 </li>
               </ul>
             </CardContent>
@@ -116,7 +116,7 @@ export default function PricingPage() {
                 </li>
                 <li className="flex items-start">
                   <Check className="h-5 w-5 text-yellow-500 mr-2 shrink-0 mt-0.5" />
-                  <span>Time: ~5–7 days</span>
+                  <span>Time: ~5–7 weeks</span>
                 </li>
               </ul>
             </CardContent>
@@ -153,7 +153,7 @@ export default function PricingPage() {
                 </li>
                 <li className="flex items-start">
                   <Check className="h-5 w-5 text-red-500 mr-2 shrink-0 mt-0.5" />
-                  <span>Time: ~10–20 days</span>
+                  <span>Time: ~10–20 weeks</span>
                 </li>
               </ul>
             </CardContent>
@@ -346,8 +346,8 @@ export default function PricingPage() {
                 <div className="space-y-2">
                   <h3 className="text-lg font-medium">How long does the process take?</h3>
                   <p className="text-gray-300">
-                    Timelines vary by project complexity: Simple websites (2-4 days), Medium websites (5-7 days), and
-                    Complex websites (10-20 days).
+                    Timelines vary by project complexity: Simple websites (2-4 weeks), Medium websites (5-7 weeks), and
+                    Complex websites (10-20 weeks).
                   </p>
                 </div>
                 <div className="space-y-2">

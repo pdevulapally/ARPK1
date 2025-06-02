@@ -79,7 +79,7 @@ export async function generateInvoice(project: Project, invoiceType: "deposit" |
   // Add footer
   doc.text("Thank you for your business!", 20, finalY + 30)
   doc.text("ARPK Web Development", 20, finalY + 35)
-  doc.text("contact@arpkwebdev.com | www.arpkwebdev.com", 20, finalY + 40)
+  doc.text("PreethamDevulapally@gmail.com | arpk.vercel.app", 20, finalY + 40)
 
   return doc
 }

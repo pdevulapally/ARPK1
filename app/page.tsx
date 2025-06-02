@@ -42,9 +42,9 @@ export default function Home() {
                   Request a Consultation <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Link href="/portfolio" className="w-full sm:w-auto">
+              <Link href="/contact" className="w-full sm:w-auto">
                 <Button variant="outline" className="w-full px-10 py-7 text-lg font-medium rounded-lg border-2 border-gray-300 dark:border-gray-700 hover:border-purple-500 dark:hover:border-purple-500 transition-all duration-300">
-                  View Our Work
+                    Contact Us
                 </Button>
               </Link>
             </div>

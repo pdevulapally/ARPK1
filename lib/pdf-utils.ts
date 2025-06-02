@@ -73,8 +73,8 @@ export async function generateInvoice(project: Project, invoiceType: "deposit" |
   // Add payment instructions
   const finalY = (doc as any).lastAutoTable.finalY || 95
   doc.text("Payment Instructions:", 20, finalY + 10)
+  doc.text("Next Payment is due once the project is finished.", 20, finalY + 20)
   doc.text("Please make payment via the payment button in your dashboard.", 20, finalY + 15)
-  doc.text("Payment is due within 14 days of invoice date.", 20, finalY + 20)
 
   // Add footer
   doc.text("Thank you for your business!", 20, finalY + 30)

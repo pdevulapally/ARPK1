@@ -98,10 +98,15 @@ export default function AdminProjectsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 pt-20 px-4"> {/* Changed py-4 to pt-20 to add more top padding */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <h1 className="text-2xl font-bold">Projects</h1>
-        <Button className="bg-purple-600 hover:bg-purple-700">Create Project</Button>
+        <Button
+          className="bg-purple-600 hover:bg-purple-700 relative"
+          onClick={() => router.push('/admin/projects/create')}
+        >
+          Create Project
+        </Button>
       </div>
 
       <Card className="border border-purple-500/30 bg-black/60 backdrop-blur-md">

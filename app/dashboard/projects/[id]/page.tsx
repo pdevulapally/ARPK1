@@ -14,7 +14,7 @@ import { useAuth } from "@/lib/auth"
 import AuthGuard from "@/components/auth-guard"
 import { PaymentButton } from "@/components/payment-button"
 import { InvoiceButton } from "@/components/invoice-button"
-import { DiscountCodeForm } from "@/components/discount-code-form"
+import DiscountCodeForm from "@/components/discount-code-form"
 import { PaymentReminderCard } from "@/components/payment-reminder"
 
 interface ProjectDetails {

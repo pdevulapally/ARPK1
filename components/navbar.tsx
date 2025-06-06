@@ -52,7 +52,7 @@ export default function Navbar() {
             <img
               src="/Images/ARPK_Logo.png"
               alt="ARPK Logo"
-              className="h-20 w-auto" // Adjust height as needed
+              className="h-12 w-auto" // Adjust height as needed
               style={{
                 filter: isScrolled ? 'brightness(1)' : 'brightness(1.2)', // Optional: adjust logo brightness based on scroll
                 transition: 'filter 0.3s ease'

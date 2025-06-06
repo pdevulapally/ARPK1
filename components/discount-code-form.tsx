@@ -37,10 +37,9 @@ export const firebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig
 export const db = getFirestore(firebaseApp)
 
 // This file exports the correct Firebase implementation based on the environment
-export * from "./firebase-types"
-
-// Re-export the client-side implementation
-export * from "./firebase-client"
+// Re-export Firebase types and client implementation from the shared lib folder
+export * from "@/lib/firebase-types"
+export * from "@/lib/firebase-client"
 
 // Re-export types
 // Export a dummy function to prevent tree-shaking

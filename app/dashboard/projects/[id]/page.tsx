@@ -145,7 +145,7 @@ export default function ProjectDetailsPage() {
             <h1 className="text-2xl font-bold">Project Details</h1>
           </div>
           <Badge
-            className={`£{statusColors[project.status as keyof typeof statusColors]} flex items-center gap-1 px-3 py-1.5`}
+           className={`${statusColors[project.status as keyof typeof statusColors]} flex items-center gap-1 px-3 py-1.5`}
           >
             {getStatusIcon(project.status)}
             <span className="capitalize">{project.status}</span>

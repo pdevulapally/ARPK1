@@ -46,17 +46,21 @@ const statusColors = {
 }
 
 // Move this outside the component to avoid recreation on each render
-const createSampleReminder = (project: ProjectDetails) => ({
-  id: "sample-reminder",
-  projectId: project.id,
-  userId: project.userId,
-  userEmail: project.userEmail,
-  paymentType: "deposit",
-  amount: Number.parseFloat(project.budget) * 0.5,
-  dueDate: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString(),
-  status: "pending",
-  createdAt: new Date().toISOString(),
-})
+const createSampleReminder = (project: ProjectDetails | null) => {
+  if (!project) return null
+
+  return {
+    id: "sample-reminder",
+    projectId: project.id,
+    userId: project.userId,
+    userEmail: project.userEmail,
+    paymentType: "deposit",
+    amount: Number.parseFloat(project.budget) * 0.5,
+    dueDate: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString(),
+    status: "pending",
+    createdAt: new Date().toISOString(),
+  }
+}
 
 export default function ProjectDetailsPage() {
   const params = useParams()
@@ -310,7 +314,17 @@ export default function ProjectDetailsPage() {
           </TabsContent>
 
           <TabsContent value="payments" className="space-y-6">
-            {project && ( // Add conditional rendering
+            {loading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
+              </div>
+            ) : !project ? (
+              <Card className="border border-red-500/30 bg-black/60 backdrop-blur-md">
+                <CardContent className="p-6 text-center">
+                  <p>Project information not available</p>
+                </CardContent>
+              </Card>
+            ) : (
               <>
                 <Card className="border border-purple-500/30 bg-black/60 backdrop-blur-md">
                   <CardHeader>
@@ -453,13 +467,11 @@ export default function ProjectDetailsPage() {
                     <CardDescription>Upcoming and past payment reminders</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    {project && (
-                      <PaymentReminderCard
-                        reminder={createSampleReminder(project)}
-                        projectId={project.id}
-                        userEmail={project.userEmail}
-                      />
-                    )}
+                    <PaymentReminderCard
+                      reminder={createSampleReminder(project)}
+                      projectId={project.id}
+                      userEmail={project.userEmail}
+                    />
                   </CardContent>
                 </Card>
               </>

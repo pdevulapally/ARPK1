@@ -12,6 +12,7 @@ import {
 } from "firebase/auth"
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore"
 import type { User } from "firebase/auth"
+import { updateProjectAssociations } from "./firebase"
 
 type AuthContextType = {
   user: User | null
@@ -183,6 +184,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           },
           { merge: true },
         )
+
+        // Add this new code
+        await updateProjectAssociations(userCredential.user.uid, email)
       }
 
       return userCredential.user
@@ -273,6 +277,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           },
           { merge: true },
         )
+      }
+
+      // Add this new code to associate any pending projects
+      if (result.user.email) {
+        await updateProjectAssociations(result.user.uid, result.user.email)
       }
 
       return result.user

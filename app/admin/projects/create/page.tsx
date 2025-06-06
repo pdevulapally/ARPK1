@@ -8,6 +8,23 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { createProject, createNotification } from "@/lib/firebase"
+import { Badge } from "@/components/ui/badge"
+
+// Add this type for our features
+type Feature = {
+  value: string
+  label: string
+}
+
+// Add this features array outside the component
+const availableFeatures: Feature[] = [
+  { value: "authentication", label: "User Authentication" },
+  { value: "payment", label: "Payment Integration" },
+  { value: "cms", label: "Content Management" },
+  { value: "seo", label: "SEO Optimization" },
+  { value: "analytics", label: "Analytics Integration" },
+  { value: "responsive", label: "Responsive Design" },
+]
 
 export default function CreateProjectPage() {
   const router = useRouter()
@@ -20,10 +37,20 @@ export default function CreateProjectPage() {
     status: "pending",
     requestId: "",
     userId: "",
-    features: [],
+    features: [] as string[],
     deadline: "",
     budget: 0
   })
+
+  // Add this function to handle feature selection
+  const toggleFeature = (feature: string) => {
+    setFormData(prev => ({
+      ...prev,
+      features: prev.features.includes(feature)
+        ? prev.features.filter(f => f !== feature)
+        : [...prev.features, feature]
+    }))
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -88,26 +115,27 @@ export default function CreateProjectPage() {
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Features</label>
-              <Select
-                required
-                value={formData.features.join(',')}
-                onValueChange={(value) => setFormData({ 
-                  ...formData, 
-                  features: value.split(',').filter(Boolean)
-                })}
-              >
-                <SelectTrigger className="bg-black/50 border-purple-500/30 focus:border-purple-500">
-                  <SelectValue placeholder="Select features" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="authentication">User Authentication</SelectItem>
-                  <SelectItem value="payment">Payment Integration</SelectItem>
-                  <SelectItem value="cms">Content Management</SelectItem>
-                  <SelectItem value="seo">SEO Optimization</SelectItem>
-                  <SelectItem value="analytics">Analytics Integration</SelectItem>
-                  <SelectItem value="responsive">Responsive Design</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {availableFeatures.map((feature) => (
+                  <Button
+                    key={feature.value}
+                    type="button"
+                    variant="outline"
+                    className={`
+                      justify-start text-left
+                      ${formData.features.includes(feature.value)
+                        ? 'bg-purple-500/20 border-purple-500'
+                        : 'bg-black/50 border-purple-500/30'}
+                    `}
+                    onClick={() => toggleFeature(feature.value)}
+                  >
+                    <span className="mr-2">
+                      {formData.features.includes(feature.value) ? '✓' : ''}
+                    </span>
+                    {feature.label}
+                  </Button>
+                ))}
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -133,17 +161,24 @@ export default function CreateProjectPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Project Budget ($)</label>
-              <Input
-                required
-                type="number"
-                min="0"
-                step="100"
-                placeholder="Enter project budget..."
-                value={formData.budget || ''}
-                onChange={(e) => setFormData({ ...formData, budget: parseFloat(e.target.value) || 0 })}
-                className="bg-black/50 border-purple-500/30 focus:border-purple-500"
-              />
+              <label className="text-sm font-medium">Project Budget (£)</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">£</span>
+                <Input
+                  required
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="Enter project budget..."
+                  value={formData.budget || ''}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value);
+                    const formattedValue = value ? Number(value.toFixed(2)) : 0;
+                    setFormData({ ...formData, budget: formattedValue });
+                  }}
+                  className="pl-7 bg-black/50 border-purple-500/30 focus:border-purple-500"
+                />
+              </div>
             </div>
 
             <div className="space-y-2">

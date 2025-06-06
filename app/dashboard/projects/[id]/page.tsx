@@ -404,7 +404,8 @@ export default function ProjectDetailsPage() {
                   onApplyDiscount={(discount) => {
                     toast({
                       title: "Discount Applied",
-                      description: `£{discount.percentage}% discount has been applied to your order.`,
+                     description: `${discount.percentage}% discount has been applied to your order.`,
+
                     })
                   }}
                 />

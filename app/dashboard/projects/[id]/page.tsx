@@ -14,7 +14,7 @@ import { useAuth } from "@/lib/auth"
 import AuthGuard from "@/components/auth-guard"
 import { PaymentButton } from "@/components/payment-button"
 import { InvoiceButton } from "@/components/invoice-button"
-import { DiscountCodeForm } from "@/components/discount-code-form"
+import DiscountCodeForm from "@/components/discount-code-form"
 import { PaymentReminderCard } from "@/components/payment-reminder"
 
 interface ProjectDetails {
@@ -440,10 +440,10 @@ export default function ProjectDetailsPage() {
                       onApplyDiscount={(discount) => {
                         toast({
                           title: "Discount Applied",
-                          description: `${discount.percentage}% discount has been applied to your order.`,
+                         description: `${discount.percentage}% discount has been applied to your order.`,
+
                         })
                       }}
-                      userEmail={project.userEmail} // Pass the user's email
                     />
 
                     <div>

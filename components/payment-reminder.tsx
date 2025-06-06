@@ -12,7 +12,11 @@ interface PaymentReminderCardProps {
   userEmail: string
 }
 
-export function PaymentReminderCard({ reminder, projectId, userEmail }: PaymentReminderCardProps) {
+export function PaymentReminderCard({ 
+  reminder, 
+  projectId, 
+  userEmail 
+}: PaymentReminderCardProps) {
   const { toast } = useToast()
   const dueDate = new Date(reminder.dueDate)
   const isOverdue = dueDate < new Date() && reminder.status === "pending"
@@ -21,6 +25,10 @@ export function PaymentReminderCard({ reminder, projectId, userEmail }: PaymentR
   const today = new Date()
   const diffTime = Math.abs(dueDate.getTime() - today.getTime())
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+  if (!reminder || !projectId || !userEmail) {
+    return null;
+  }
 
   return (
     <Card className={`border ${isOverdue ? "border-red-500/30" : "border-purple-500/30"} bg-black/60 backdrop-blur-md`}>

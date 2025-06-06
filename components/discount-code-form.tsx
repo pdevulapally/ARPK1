@@ -9,11 +9,9 @@ import { getDiscountCode, applyDiscountCode, type DiscountCode } from "@/lib/fir
 
 interface DiscountCodeFormProps {
   onApplyDiscount: (discount: DiscountCode) => void
-  userEmail: string // Add this prop
 }
 
-// Remove the default export and use named export
-export function DiscountCodeForm({ onApplyDiscount, userEmail }: DiscountCodeFormProps) {
+export default function DiscountCodeForm({ onApplyDiscount }: DiscountCodeFormProps) {
   const [code, setCode] = useState("")
   const [loading, setLoading] = useState(false)
   const [appliedDiscount, setAppliedDiscount] = useState<DiscountCode | null>(null)
@@ -26,26 +24,28 @@ export function DiscountCodeForm({ onApplyDiscount, userEmail }: DiscountCodeFor
 
     try {
       setLoading(true)
-      const discountCode = await getDiscountCode(code.trim(), userEmail) // Pass userEmail here
+      const discountCode = await getDiscountCode(code.trim())
 
       if (!discountCode) {
         toast({
           title: "Invalid Code",
-          description: "This discount code is invalid, expired, has reached its usage limit, or is not available for your account.",
+          description: "This discount code is invalid, expired, or has reached its usage limit.",
           variant: "destructive",
         })
-        setCode("")
         return
       }
 
       // Apply the discount and increment usage counter
       await applyDiscountCode(discountCode.id)
+
       setAppliedDiscount(discountCode)
       onApplyDiscount(discountCode)
 
       toast({
         title: "Discount Applied",
-        description: `${discountCode.percentage}% discount has been applied to your order.`,
+        description:
+          `${discountCode.percentage}% discount has been applied to your order. ` +
+          (discountCode.description ? `(${discountCode.description})` : ""),
       })
     } catch (error: any) {
       toast({
@@ -53,7 +53,6 @@ export function DiscountCodeForm({ onApplyDiscount, userEmail }: DiscountCodeFor
         description: error.message || "Failed to apply discount code",
         variant: "destructive",
       })
-      setCode("")
     } finally {
       setLoading(false)
     }

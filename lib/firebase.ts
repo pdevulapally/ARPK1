@@ -86,7 +86,7 @@ export interface User {
   email: string
   displayName?: string
   photoURL?: string
-  role: string
+  role: 'admin' | 'client'
   createdAt: Timestamp
   lastLogin?: Timestamp
 }
@@ -202,33 +202,91 @@ export async function updateRequestStatus(requestId: string, status: string, add
 }
 
 // Project functions
-export async function createProject(projectData: Omit<Project, "id" | "createdAt">) {
+export async function createProject(projectData: Omit<Project, 'id'>) {
   try {
-    const docRef = await addDoc(collection(db, "projects"), {
+    // Normalize the email
+    const normalizedEmail = projectData.userEmail.toLowerCase();
+
+    // Check if a user with this email already exists
+    const usersRef = collection(db, 'users');
+    const userQuery = query(usersRef, where('email', '==', normalizedEmail));
+    const userSnapshot = await getDocs(userQuery);
+
+    let userId = 'pending'; // Default to pending if no user exists
+
+    if (!userSnapshot.empty) {
+      // If user exists, use their ID
+      userId = userSnapshot.docs[0].id;
+    }
+
+    // Create the project with normalized email
+    const projectsRef = collection(db, 'projects');
+    const docRef = await addDoc(projectsRef, {
       ...projectData,
+      userEmail: normalizedEmail, // Store normalized email
+      userId: userId, // Either the actual userId or 'pending'
       createdAt: serverTimestamp(),
-      paymentStatus: "awaiting_deposit",
-      depositPaid: false,
-      finalPaid: false,
-    })
-    return docRef.id
+    });
+
+    // Create notification if user exists
+    if (userId !== 'pending') {
+      await createNotification({
+        userId,
+        title: "New Project Created",
+        message: `A new ${projectData.websiteType} website project has been created for you.`,
+        type: "project",
+        read: false,
+        createdAt: new Date().toISOString(),
+        linkTo: `/dashboard/projects/${docRef.id}`,
+      });
+    }
+
+    return docRef.id;
   } catch (error) {
-    console.error("Error creating project:", error)
-    throw error
+    console.error("Error creating project:", error);
+    throw error;
   }
 }
 
-export async function getUserProjects(userId: string) {
+export async function getUserProjects(userIdOrEmail: string) {
   try {
-    const q = query(collection(db, "projects"), where("userId", "==", userId), orderBy("createdAt", "desc"))
-    const querySnapshot = await getDocs(q)
-    return querySnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Project[]
+    const normalizedEmail = userIdOrEmail.toLowerCase();
+    
+    // Create compound query for both userId and userEmail
+    const queries = [
+      query(
+        collection(db, "projects"),
+        where("userId", "==", userIdOrEmail),
+        orderBy("createdAt", "desc")
+      ),
+      query(
+        collection(db, "projects"),
+        where("userEmail", "==", normalizedEmail),
+        orderBy("createdAt", "desc")
+      )
+    ];
+
+    // Execute both queries
+    const results = await Promise.all(queries.map(q => getDocs(q)));
+    
+    // Combine and deduplicate results
+    const projectsMap = new Map();
+    
+    results.forEach(snapshot => {
+      snapshot.docs.forEach(doc => {
+        if (!projectsMap.has(doc.id)) {
+          projectsMap.set(doc.id, {
+            id: doc.id,
+            ...doc.data()
+          });
+        }
+      });
+    });
+
+    return Array.from(projectsMap.values()) as Project[];
   } catch (error) {
-    console.error("Error getting user projects:", error)
-    throw error
+    console.error("Error getting user projects:", error);
+    throw error;
   }
 }
 
@@ -441,5 +499,71 @@ export async function createUserSubscription(
   } catch (error) {
     console.error("Error creating user subscription:", error)
     throw error
+  }
+}
+
+// Notification functions
+export async function createNotification(notificationData: {
+  userId: string
+  title: string
+  message: string
+  type: string
+  read: boolean
+  createdAt: string
+  linkTo: string
+}) {
+  const notificationsRef = collection(db, 'notifications')
+  await addDoc(notificationsRef, notificationData)
+}
+
+export async function updateProjectAssociations(userId: string, userEmail: string) {
+  try {
+    const normalizedEmail = userEmail.toLowerCase();
+    
+    // Find ALL projects with matching email (not just pending ones)
+    const q = query(
+      collection(db, "projects"),
+      where("userEmail", "==", normalizedEmail)
+    );
+    
+    const querySnapshot = await getDocs(q);
+    
+    // Update all projects with this email to have the correct userId
+    const updates = querySnapshot.docs.map(doc => {
+      const currentData = doc.data();
+      // Only update if userId is 'pending' or doesn't match
+      if (currentData.userId === 'pending' || currentData.userId !== userId) {
+        return updateDoc(doc.ref, {
+          userId: userId
+        });
+      }
+      return Promise.resolve(); // No update needed
+    });
+    
+    await Promise.all(updates);
+
+    // Create notifications for newly associated projects
+    const notifications = querySnapshot.docs.map(doc => {
+      const projectData = doc.data();
+      if (projectData.userId === 'pending') {
+        return createNotification({
+          userId,
+          title: "Project Associated",
+          message: `A ${projectData.websiteType} website project has been linked to your account.`,
+          type: "project",
+          read: false,
+          createdAt: new Date().toISOString(),
+          linkTo: `/dashboard/projects/${doc.id}`,
+        });
+      }
+      return Promise.resolve(); // No notification needed
+    });
+
+    await Promise.all(notifications);
+    
+    return true;
+  } catch (error) {
+    console.error("Error updating project associations:", error);
+    throw error;
   }
 }

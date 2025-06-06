@@ -45,6 +45,19 @@ const statusColors = {
   completed: "bg-green-500/20 text-green-500 border-green-500/50",
 }
 
+// Move this outside the component to avoid recreation on each render
+const createSampleReminder = (project: ProjectDetails) => ({
+  id: "sample-reminder",
+  projectId: project.id,
+  userId: project.userId,
+  userEmail: project.userEmail,
+  paymentType: "deposit",
+  amount: Number.parseFloat(project.budget) * 0.5,
+  dueDate: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString(),
+  status: "pending",
+  createdAt: new Date().toISOString(),
+})
+
 export default function ProjectDetailsPage() {
   const params = useParams()
   const router = useRouter()
@@ -297,158 +310,160 @@ export default function ProjectDetailsPage() {
           </TabsContent>
 
           <TabsContent value="payments" className="space-y-6">
-            <Card className="border border-purple-500/30 bg-black/60 backdrop-blur-md">
-              <CardHeader>
-                <CardTitle>Payment Information</CardTitle>
-                <CardDescription>Manage payments for your project</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-400 mb-1">Total Budget</h3>
-                    <p className="text-2xl font-medium">£{project.budget}</p>
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-medium text-gray-400 mb-1">Payment Status</h3>
-                    <Badge
-                      className={
-                        project.depositPaid ? "bg-green-500/20 text-green-500" : "bg-yellow-500/20 text-yellow-500"
-                      }
-                    >
-                      {project.paymentStatus || "Awaiting Deposit"}
-                    </Badge>
-                  </div>
-                </div>
+            {project && ( // Add conditional rendering
+              <>
+                <Card className="border border-purple-500/30 bg-black/60 backdrop-blur-md">
+                  <CardHeader>
+                    <CardTitle>Payment Information</CardTitle>
+                    <CardDescription>Manage payments for your project</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-400 mb-1">Total Budget</h3>
+                        <p className="text-2xl font-medium">£{project.budget}</p>
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-400 mb-1">Payment Status</h3>
+                        <Badge
+                          className={
+                            project.depositPaid ? "bg-green-500/20 text-green-500" : "bg-yellow-500/20 text-yellow-500"
+                          }
+                        >
+                          {project.paymentStatus || "Awaiting Deposit"}
+                        </Badge>
+                      </div>
+                    </div>
 
-                <Separator className="bg-purple-500/20" />
+                    <Separator className="bg-purple-500/20" />
 
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h3 className="font-medium">Deposit (50%)</h3>
+                          <p className="text-sm text-gray-400">£{Number.parseFloat(project.budget) * 0.5}</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Badge
+                            variant={project.depositPaid ? "default" : "outline"}
+                            className={project.depositPaid ? "bg-green-500/20 text-green-500" : ""}
+                          >
+                            {project.depositPaid ? "Paid" : "Unpaid"}
+                          </Badge>
+
+                          {!project.depositPaid ? (
+                            <PaymentButton
+                              projectId={project.id}
+                              amount={Number.parseFloat(project.budget) * 0.5}
+                              userEmail={project.userEmail}
+                              paymentType="deposit"
+                              label="Pay Deposit"
+                              className="bg-purple-600 hover:bg-purple-700"
+                            />
+                          ) : (
+                            <InvoiceButton
+                              project={{
+                                ...project,
+                                requestId: project.id,
+                                customerId: project.userId,
+                                depositAmount: Number.parseFloat(project.budget) * 0.5,
+                                finalAmount: Number.parseFloat(project.budget) * 0.5,
+                                title: `${project.websiteType} Website Project`
+                              }}
+                              invoiceType="deposit"
+                              className="border-green-500/30 text-green-500 hover:bg-green-900/20"
+                            />
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h3 className="font-medium">Final Payment (50%)</h3>
+                          <p className="text-sm text-gray-400">£{Number.parseFloat(project.budget) * 0.5}</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Badge
+                            variant={project.finalPaid ? "default" : "outline"}
+                            className={project.finalPaid ? "bg-green-500/20 text-green-500" : ""}
+                          >
+                            {project.finalPaid ? "Paid" : "Unpaid"}
+                          </Badge>
+
+                          {project.depositPaid && !project.finalPaid && project.status === "completed" ? (
+                            <PaymentButton
+                              projectId={project.id}
+                              amount={Number.parseFloat(project.budget) * 0.5}
+                              userEmail={project.userEmail}
+                              paymentType="final"
+                              label="Pay Final Amount"
+                              className="bg-green-600 hover:bg-green-700"
+                            />
+                          ) : (
+                            project.finalPaid && (
+                              <InvoiceButton
+                                project={{
+                                  ...project,
+                                  requestId: project.id, // Using id as requestId
+                                  customerId: project.userId, // Using userId as customerId
+                                  depositAmount: Number.parseFloat(project.budget) * 0.5,
+                                  finalAmount: Number.parseFloat(project.budget) * 0.5,
+                                  title: `${project.websiteType} Website Project` // Generating title from websiteType
+                                }}
+                                invoiceType="final"
+                                className="border-green-500/30 text-green-500 hover:bg-green-900/20"
+                              />
+                            )
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <Separator className="bg-purple-500/20" />
+
+                    {/* Add discount code form */}
+                    <DiscountCodeForm
+                      onApplyDiscount={(discount) => {
+                        toast({
+                          title: "Discount Applied",
+                         description: `${discount.percentage}% discount has been applied to your order.`,
+
+                        })
+                      }}
+                    />
+
                     <div>
-                      <h3 className="font-medium">Deposit (50%)</h3>
-                      <p className="text-sm text-gray-400">£{Number.parseFloat(project.budget) * 0.5}</p>
+                      <h3 className="text-sm font-medium text-gray-400 mb-2">Payment Policy</h3>
+                      <div className="text-gray-300 bg-black/40 p-4 rounded-md border border-purple-500/20">
+                        <p className="mb-2">Our payment process is structured in two parts:</p>
+                        <ul className="list-disc pl-5 space-y-1">
+                          <li>50% deposit payment is required to begin work on your project</li>
+                          <li>The remaining 50% is due upon project completion</li>
+                          <li>All payments are processed securely through Stripe</li>
+                          <li>Invoices will be provided for all payments</li>
+                        </ul>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <Badge
-                        variant={project.depositPaid ? "default" : "outline"}
-                        className={project.depositPaid ? "bg-green-500/20 text-green-500" : ""}
-                      >
-                        {project.depositPaid ? "Paid" : "Unpaid"}
-                      </Badge>
+                  </CardContent>
+                </Card>
 
-                      {!project.depositPaid ? (
-                        <PaymentButton
-                          projectId={project.id}
-                          amount={Number.parseFloat(project.budget) * 0.5}
-                          userEmail={project.userEmail}
-                          paymentType="deposit"
-                          label="Pay Deposit"
-                          className="bg-purple-600 hover:bg-purple-700"
-                        />
-                      ) : (
-                        <InvoiceButton
-                          project={project}
-                          invoiceType="deposit"
-                          className="border-green-500/30 text-green-500 hover:bg-green-900/20"
-                        />
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="font-medium">Final Payment (50%)</h3>
-                      <p className="text-sm text-gray-400">£{Number.parseFloat(project.budget) * 0.5}</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Badge
-                        variant={project.finalPaid ? "default" : "outline"}
-                        className={project.finalPaid ? "bg-green-500/20 text-green-500" : ""}
-                      >
-                        {project.finalPaid ? "Paid" : "Unpaid"}
-                      </Badge>
-
-                      {project.depositPaid && !project.finalPaid && project.status === "completed" ? (
-                        <PaymentButton
-                          projectId={project.id}
-                          amount={Number.parseFloat(project.budget) * 0.5}
-                          userEmail={project.userEmail}
-                          paymentType="final"
-                          label="Pay Final Amount"
-                          className="bg-green-600 hover:bg-green-700"
-                        />
-                      ) : (
-                        project.finalPaid && (
-                          <InvoiceButton
-                            project={{
-                              ...project,
-                              requestId: project.id, // Using id as requestId
-                              customerId: project.userId, // Using userId as customerId
-                              depositAmount: Number.parseFloat(project.budget) * 0.5,
-                              finalAmount: Number.parseFloat(project.budget) * 0.5,
-                              title: `${project.websiteType} Website Project` // Generating title from websiteType
-                            }}
-                            invoiceType="final"
-                            className="border-green-500/30 text-green-500 hover:bg-green-900/20"
-                          />
-                        )
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <Separator className="bg-purple-500/20" />
-
-                {/* Add discount code form */}
-                <DiscountCodeForm
-                  onApplyDiscount={(discount) => {
-                    toast({
-                      title: "Discount Applied",
-                     description: `${discount.percentage}% discount has been applied to your order.`,
-
-                    })
-                  }}
-                />
-
-                <div>
-                  <h3 className="text-sm font-medium text-gray-400 mb-2">Payment Policy</h3>
-                  <div className="text-gray-300 bg-black/40 p-4 rounded-md border border-purple-500/20">
-                    <p className="mb-2">Our payment process is structured in two parts:</p>
-                    <ul className="list-disc pl-5 space-y-1">
-                      <li>50% deposit payment is required to begin work on your project</li>
-                      <li>The remaining 50% is due upon project completion</li>
-                      <li>All payments are processed securely through Stripe</li>
-                      <li>Invoices will be provided for all payments</li>
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Add payment reminders section */}
-            <Card className="border border-purple-500/30 bg-black/60 backdrop-blur-md">
-              <CardHeader>
-                <CardTitle>Payment Reminders</CardTitle>
-                <CardDescription>Upcoming and past payment reminders</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <PaymentReminderCard
-                  reminder={{
-                    id: "sample-reminder",
-                    projectId: project.id,
-                    userId: project.userId,
-                    userEmail: project.userEmail,
-                    paymentType: "deposit",
-                    amount: Number.parseFloat(project.budget) * 0.5,
-                    dueDate: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString(),
-                    status: "pending",
-                    createdAt: new Date().toISOString(),
-                  }}
-                  projectId={project.id}
-                  userEmail={project.userEmail}
-                />
-              </CardContent>
-            </Card>
+                <Card className="border border-purple-500/30 bg-black/60 backdrop-blur-md">
+                  <CardHeader>
+                    <CardTitle>Payment Reminders</CardTitle>
+                    <CardDescription>Upcoming and past payment reminders</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {project && (
+                      <PaymentReminderCard
+                        reminder={createSampleReminder(project)}
+                        projectId={project.id}
+                        userEmail={project.userEmail}
+                      />
+                    )}
+                  </CardContent>
+                </Card>
+              </>
+            )}
           </TabsContent>
         </Tabs>
       </div>

@@ -8,11 +8,12 @@ import {
   doc,
   updateDoc,
   serverTimestamp,
-  type Timestamp,
   addDoc,
   limit,
   increment,
   getFirestore,
+  getDoc,
+  Timestamp 
 } from "firebase/firestore"
 
 // Firebase configuration
@@ -101,6 +102,8 @@ export interface DiscountCode {
   createdAt: Timestamp | string
   isActive: boolean
   description?: string
+  isPublic: boolean
+  allowedUsers: string[] // Array of user emails that can use this discount
 }
 
 export interface SubscriptionPlan {
@@ -142,6 +145,20 @@ export interface PaymentReminder {
   createdAt: Timestamp | string
   sentAt?: Timestamp | string
   paidAt?: Timestamp | string
+}
+
+export interface Invoice {
+  id: string
+  userEmail: string
+  userName?: string
+  amount: number
+  discount?: number
+  description: string
+  status: 'paid' | 'pending' | 'overdue'
+  createdAt: string | Timestamp
+  dueDate: string
+  paidAt?: string
+  paymentMethod?: string
 }
 
 // Request functions
@@ -385,35 +402,44 @@ export async function getUserPaymentReminders(userId: string) {
   }
 }
 
-export async function getDiscountCode(code: string) {
+export async function getDiscountCode(code: string, userEmail?: string) {
   try {
-    const q = query(collection(db, "discountCodes"), where("code", "==", code), where("isActive", "==", true), limit(1))
-    const querySnapshot = await getDocs(q)
+    const normalizedCode = code.toUpperCase().trim()
+    const discountsRef = collection(db, "discountCodes")
+    const q = query(
+      discountsRef,
+      where("code", "==", normalizedCode),
+      where("isActive", "==", true),
+      limit(1)
+    )
 
-    if (querySnapshot.empty) {
-      return null
-    }
+    const querySnapshot = await getDocs(q)
+    if (querySnapshot.empty) return null
 
     const discountDoc = querySnapshot.docs[0]
-    const discountData = discountDoc.data() as DiscountCode
-
-    // Check if code has expired
-    if (new Date(discountData.expiryDate) < new Date()) {
-      return null
-    }
-
-    // Check if code has reached max uses
-    if (discountData.currentUses >= discountData.maxUses) {
-      return null
-    }
-
-    return {
-      docId: discountDoc.id,
-      ...discountData,
+    const discount = {
+      id: discountDoc.id,
+      ...discountDoc.data()
     } as DiscountCode
+
+    // Check if discount is expired
+    if (new Date(discount.expiryDate) < new Date()) return null
+
+    // Check if maximum uses reached
+    if (discount.currentUses >= discount.maxUses) return null
+
+    // Check user restrictions
+    if (!discount.isPublic && userEmail) {
+      const allowedUsers = discount.allowedUsers || []
+      if (!allowedUsers.includes(userEmail.toLowerCase())) {
+        return null
+      }
+    }
+
+    return discount
   } catch (error) {
     console.error("Error getting discount code:", error)
-    throw error
+    return null
   }
 }
 
@@ -421,7 +447,7 @@ export async function applyDiscountCode(discountId: string) {
   try {
     const discountRef = doc(db, "discountCodes", discountId)
     await updateDoc(discountRef, {
-      currentUses: increment(1),
+      currentUses: increment(1)
     })
     return true
   } catch (error) {
@@ -565,5 +591,34 @@ export async function updateProjectAssociations(userId: string, userEmail: strin
   } catch (error) {
     console.error("Error updating project associations:", error);
     throw error;
+  }
+}
+
+export async function getInvoiceById(id: string): Promise<Invoice | null> {
+  try {
+    const docRef = doc(db, "invoices", id)
+    const docSnap = await getDoc(docRef)
+
+    if (!docSnap.exists()) {
+      return null
+    }
+
+    const data = docSnap.data()
+    return {
+      id: docSnap.id,
+      userEmail: data.userEmail,
+      userName: data.userName,
+      amount: data.amount,
+      discount: data.discount,
+      description: data.description,
+      status: data.status,
+      createdAt: data.createdAt,
+      dueDate: data.dueDate,
+      paidAt: data.paidAt,
+      paymentMethod: data.paymentMethod
+    } as Invoice
+  } catch (error) {
+    console.error("Error fetching invoice:", error)
+    throw error
   }
 }

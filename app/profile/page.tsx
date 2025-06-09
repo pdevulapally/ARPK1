@@ -39,7 +39,7 @@ interface UserProfile {
   bio?: string
   avatar?: string
   joinedDate?: Date
-  accountType?: 'free' | 'premium' | 'enterprise'
+  accountType?: 'admin' | 'client'  // Update this line
   lastLogin?: Date
 }
 
@@ -59,7 +59,7 @@ export default function ProfilePage() {
     website: "",
     bio: "",
     avatar: "",
-    accountType: 'free',
+    accountType: 'client',
   })
 
   useEffect(() => {
@@ -75,8 +75,8 @@ export default function ProfilePage() {
           setProfile({
             ...data as UserProfile,
             email: user.email || "",
-            joinedDate: data.createdAt?.toDate() || user.metadata?.creationTime ? new Date(user.metadata.creationTime) : new Date(),
-            lastLogin: data.lastLogin?.toDate() || user.metadata?.lastSignInTime ? new Date(user.metadata.lastSignInTime) : new Date(),
+            joinedDate: data.createdAt?.toDate() || (user.metadata?.creationTime ? new Date(user.metadata.creationTime) : new Date()),
+            lastLogin: data.lastLogin?.toDate() || (user.metadata?.lastSignInTime ? new Date(user.metadata.lastSignInTime) : new Date()),
           })
         } else {
           setProfile({
@@ -88,7 +88,7 @@ export default function ProfilePage() {
             website: "",
             bio: "",
             avatar: user.photoURL || "",
-            accountType: 'free',
+            accountType: 'client',
             joinedDate: user.metadata?.creationTime ? new Date(user.metadata.creationTime) : new Date(),
             lastLogin: user.metadata?.lastSignInTime ? new Date(user.metadata.lastSignInTime) : new Date(),
           })
@@ -143,11 +143,18 @@ export default function ProfilePage() {
 
   const getAccountBadge = () => {
     const badges = {
-      free: { label: "Free", color: "bg-gray-500", icon: User },
-      premium: { label: "Premium", color: "bg-gradient-to-r from-purple-500 to-pink-500", icon: Crown },
-      enterprise: { label: "Enterprise", color: "bg-gradient-to-r from-blue-500 to-cyan-500", icon: Shield }
+      admin: { 
+        label: "Admin", 
+        color: "bg-gradient-to-r from-purple-500 to-pink-500", 
+        icon: Shield 
+      },
+      client: { 
+        label: "Client", 
+        color: "bg-gradient-to-r from-blue-500 to-cyan-500", 
+        icon: User 
+      }
     }
-    const badge = badges[profile.accountType || 'free']
+    const badge = badges[profile.accountType || 'client']
     const Icon = badge.icon
     
     return (

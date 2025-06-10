@@ -256,7 +256,7 @@ export default function Home() {
             <div>
               <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Contact</h4>
               <ul className="space-y-2 text-gray-600 dark:text-gray-400">
-                <li>PreethamDevulapally@gmail.com</li>
+                <li>arpkwebsitedevelopment@gmail.com</li>
               </ul>
             </div>
           </div>

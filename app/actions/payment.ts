@@ -24,10 +24,22 @@ export async function createCheckoutSession(
 ) {
   try {
     const stripe = getStripeServer()
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.startsWith('http') 
+      ? process.env.NEXT_PUBLIC_APP_URL 
+      : `https://${process.env.NEXT_PUBLIC_APP_URL}`
 
-    // Create a checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
+      payment_intent_data: {
+        application_fee_amount: Math.floor(amount * 50), // 50% of the amount
+        transfer_data: {
+          destination: process.env.STRIPE_CONNECTED_ACCOUNT_ID!, // Your friend's connected account
+        },
+        metadata: {
+          projectId,
+          paymentType,
+        }
+      },
       line_items: [
         {
           price_data: {
@@ -36,14 +48,14 @@ export async function createCheckoutSession(
               name: `${paymentType === "deposit" ? "Deposit" : "Final"} Payment for Project`,
               description: `Project ID: ${projectId}`,
             },
-            unit_amount: amount * 100, // Convert to cents
+            unit_amount: amount * 100,
           },
           quantity: 1,
         },
       ],
       mode: "payment",
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=cancelled`,
+      success_url: `${baseUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/payment/cancel?projectId=${projectId}`,
       customer_email: userEmail,
       metadata: {
         projectId,

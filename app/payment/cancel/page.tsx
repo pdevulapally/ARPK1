@@ -1,13 +1,13 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { AlertCircle, ArrowLeft, RefreshCw } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 
-export default function PaymentCancelPage() {
+function CancelPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { toast } = useToast()
@@ -72,64 +72,90 @@ export default function PaymentCancelPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
-      <Card className="max-w-md w-full border border-orange-500/30 bg-black/60 backdrop-blur-xl">
-        <CardHeader className="text-center pb-2">
-          <AlertCircle className="h-12 w-12 text-orange-500 mx-auto mb-4" />
-          <CardTitle className="text-2xl text-white">Payment Incomplete</CardTitle>
-          <CardDescription className="text-white/60">
-            {retryCount < 2 
-              ? "Your payment wasn't completed. Would you like to try again?"
-              : "Your payment has been cancelled. No charges have been made."}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4 pt-4">
-          {retryCount < 2 ? (
-            <div className="grid gap-4">
-              <Button 
-                onClick={handleRetry}
-                disabled={isRetrying}
-                className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
-              >
-                {isRetrying ? (
-                  <>
-                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                    Retrying...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    Try Payment Again
-                  </>
-                )}
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  localStorage.removeItem('paymentRetryCount')
-                  router.push("/dashboard")
-                }}
-                disabled={isRetrying}
-                className="border-white/20 text-white/60 hover:bg-white/10"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Dashboard
-              </Button>
-            </div>
-          ) : (
+    <Card className="max-w-md w-full border border-orange-500/30 bg-black/60 backdrop-blur-xl">
+      <CardHeader className="text-center pb-2">
+        <AlertCircle className="h-12 w-12 text-orange-500 mx-auto mb-4" />
+        <CardTitle className="text-2xl text-white">Payment Incomplete</CardTitle>
+        <CardDescription className="text-white/60">
+          {retryCount < 2 
+            ? "Your payment wasn't completed. Would you like to try again?"
+            : "Your payment has been cancelled. No charges have been made."}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4 pt-4">
+        {retryCount < 2 ? (
+          <div className="grid gap-4">
             <Button 
+              onClick={handleRetry}
+              disabled={isRetrying}
+              className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700"
+            >
+              {isRetrying ? (
+                <>
+                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                  Retrying...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  Try Payment Again
+                </>
+              )}
+            </Button>
+            <Button 
+              variant="outline" 
               onClick={() => {
                 localStorage.removeItem('paymentRetryCount')
                 router.push("/dashboard")
               }}
-              className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              disabled={isRetrying}
+              className="border-white/20 text-white/60 hover:bg-white/10"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Return to Dashboard
+              Back to Dashboard
             </Button>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        ) : (
+          <Button 
+            onClick={() => {
+              localStorage.removeItem('paymentRetryCount')
+              router.push("/dashboard")
+            }}
+            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Return to Dashboard
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
+// Loading fallback component
+function LoadingCard() {
+  return (
+    <Card className="max-w-md w-full border border-orange-500/30 bg-black/60 backdrop-blur-xl">
+      <CardHeader className="text-center pb-2">
+        <div className="h-12 w-12 rounded-full bg-orange-500/20 animate-pulse mx-auto mb-4" />
+        <div className="h-8 w-3/4 bg-white/10 animate-pulse mx-auto rounded" />
+        <div className="h-4 w-1/2 bg-white/10 animate-pulse mx-auto mt-2 rounded" />
+      </CardHeader>
+      <CardContent className="space-y-4 pt-4">
+        <div className="h-10 bg-white/10 animate-pulse rounded" />
+        <div className="h-10 bg-white/10 animate-pulse rounded" />
+      </CardContent>
+    </Card>
+  )
+}
+
+// Main component with Suspense
+export default function PaymentCancelPage() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
+      <Suspense fallback={<LoadingCard />}>
+        <CancelPageContent />
+      </Suspense>
     </div>
   )
 }

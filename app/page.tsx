@@ -39,7 +39,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row justify-center gap-5">
               <Link href="/request" className="w-full sm:w-auto">
                 <Button className="w-full bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-800 hover:to-indigo-800 dark:from-purple-600 dark:to-indigo-600 text-white px-10 py-7 text-lg font-medium rounded-lg shadow-lg hover:shadow-purple-500/20 transition-all duration-300">
-                  Request a Consultation <ArrowRight className="ml-2 h-5 w-5" />
+                  Request a Website <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <Link href="/contact" className="w-full sm:w-auto">

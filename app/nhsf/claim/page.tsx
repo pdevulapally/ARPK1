@@ -105,7 +105,7 @@ export default function PremiumNHSFClaimPage() {
     { icon: Globe, text: "Professional website with modern design", color: "from-purple-500 to-pink-500" },
     { icon: Users, text: "Committee profiles and event management", color: "from-blue-500 to-purple-500" },
     { icon: Calendar, text: "Event calendar and booking system", color: "from-purple-500 to-indigo-500" },
-    { icon: Gift, text: "Free hosting for one year", color: "from-pink-500 to-purple-500" },
+    { icon: Gift, text: "Free domain for one year", color: "from-pink-500 to-purple-500" },
   ]
 
   const timelineSteps = [

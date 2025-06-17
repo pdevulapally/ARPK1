@@ -622,3 +622,19 @@ export async function getInvoiceById(id: string): Promise<Invoice | null> {
     throw error
   }
 }
+
+export async function createNHSFRequest(data: any) {
+  try {
+    const database = getFirestore()
+    const docRef = await addDoc(collection(database, "nhsf-requests"), {
+      ...data,
+      createdAt: serverTimestamp(),
+      type: "nhsf",
+      status: "pending"
+    })
+    return docRef.id
+  } catch (error) {
+    console.error("Error creating NHSF request:", error)
+    throw error
+  }
+}

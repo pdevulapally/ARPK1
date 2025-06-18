@@ -14,7 +14,7 @@ import { useAuth } from "@/lib/auth"
 import AuthGuard from "@/components/auth-guard"
 import { PaymentButton } from "@/components/payment-button"
 import { InvoiceButton } from "@/components/invoice-button"
-import DiscountCodeForm from "@/components/discount-code-form"
+import { DiscountCodeForm } from "@/components/discount-code-form"
 import { PaymentReminderCard } from "@/components/payment-reminder"
 
 interface ProjectDetails {
@@ -62,7 +62,7 @@ const createSampleReminder = (project: ProjectDetails | null) => {
   }
 }
 
-export default function ProjectDetailsPage() {
+const ProjectDetailsPage = () => {
   const params = useParams()
   const router = useRouter()
   const { toast } = useToast()
@@ -151,6 +151,14 @@ export default function ProjectDetailsPage() {
     )
   }
 
+  // Add safety check for null/undefined project
+  if (!project) {
+    return <div>Loading...</div>
+  }
+
+  // Ensure features is always an array
+  const features = Array.isArray(project.features) ? project.features : []
+
   return (
     <AuthGuard>
       <div className="container mx-auto px-4 py-24">
@@ -213,7 +221,7 @@ export default function ProjectDetailsPage() {
                 <div>
                   <h3 className="text-sm font-medium text-gray-400 mb-2">Features</h3>
                   <div className="flex flex-wrap gap-2">
-                    {project.features.map((feature) => (
+                    {features.map((feature) => (
                       <Badge key={feature} variant="outline" className="capitalize">
                         {feature.replace("-", " ")}
                       </Badge>
@@ -482,3 +490,5 @@ export default function ProjectDetailsPage() {
     </AuthGuard>
   )
 }
+
+export default ProjectDetailsPage

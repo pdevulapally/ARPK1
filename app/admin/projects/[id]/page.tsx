@@ -26,11 +26,69 @@ interface ProjectDetails {
   budget: string
   status: string
   createdAt: any
+  designStyle?: string
+  designInspiration?: string
+  brandColors?: string
   designPreferences?: string
+  timeline?: string
+  customBudget?: string
   additionalNotes?: string
   paymentStatus?: string
   depositPaid?: boolean
   finalPaid?: boolean
+}
+
+interface ProjectRequirements {
+  // Core Details
+  websiteType: "business" | "ecommerce" | "portfolio" | "blog" | "landing"
+  status: "pending" | "in progress" | "client review" | "final review" | "completed" | "on hold"
+
+  // Client Info
+  userId: string
+  userEmail: string
+
+  // Budget & Timeline
+  budget: {
+    amount: number // Parsed from budget ranges like "500-1500"
+    paymentSchedule: {
+      deposit: number // 50% of total
+      final: number // 50% of total
+    }
+  }
+  deadline: string // Mapped from timeline options (2weeks, 1month, 2months)
+
+  // Core Features (based on coreFeatures array)
+  features: {
+    responsive: boolean // Essential
+    seo: boolean // Essential
+    contact: boolean
+    cms: boolean
+    social: boolean
+    analytics: boolean
+    additionalFeatures?: string[] // Any custom features requested
+  }
+
+  // Design Requirements
+  design: {
+    style: "modern" | "friendly" | "professional" | "creative"
+    designInspiration?: string
+    brandColors?: string
+    customPreferences?: string
+  }
+
+  // Project Details
+  description: string
+  additionalRequirements?: string
+
+  // Tracking
+  createdAt: string
+  updatedAt?: string
+  completedAt?: string
+
+  // Payment Status
+  paymentStatus?: string
+  depositPaid: boolean
+  finalPaid: boolean
 }
 
 const statusColors = {
@@ -145,6 +203,18 @@ export default function ProjectDetailsPage() {
     )
   }
 
+  // Add safety check for null/undefined project
+  if (!project) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Ensure features is always an array with proper typing
+  const features = Array.isArray(project.features) ? project.features : []
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -200,7 +270,7 @@ export default function ProjectDetailsPage() {
               <div>
                 <h3 className="text-sm font-medium text-gray-400 mb-2">Features</h3>
                 <div className="flex flex-wrap gap-2">
-                  {project.features.map((feature) => (
+                  {features.map((feature) => (
                     <Badge key={feature} variant="outline" className="capitalize">
                       {feature.replace("-", " ")}
                     </Badge>
@@ -247,7 +317,7 @@ export default function ProjectDetailsPage() {
                       })}
                     />
                   </div>
-                  
+
                   <div className="flex-1 space-y-4">
                     <div className="relative pt-1">
                       <div className="flex items-center justify-between mb-2">
@@ -355,42 +425,129 @@ export default function ProjectDetailsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <span className="inline-block w-2 h-2 rounded-full bg-purple-500" />
-                Project Details
+                Project Requirements
               </CardTitle>
-              <CardDescription className="text-purple-300/70">Detailed information about this project</CardDescription>
+              <CardDescription className="text-purple-300/70">
+                Detailed information provided by the client
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-8">
-              {project.designPreferences && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="grid gap-6"
+              >
+                {/* Website Type */}
+                <div>
                   <h3 className="text-sm font-medium text-purple-300 mb-2 flex items-center gap-2">
                     <span className="inline-block w-1 h-1 rounded-full bg-purple-500" />
-                    Design Preferences
+                    Website Type
                   </h3>
-                  <p className="text-gray-300 bg-black/40 p-6 rounded-lg border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300">
-                    {project.designPreferences}
-                  </p>
-                </motion.div>
-              )}
+                  <div className="bg-black/40 p-6 rounded-lg border border-purple-500/20">
+                    <p className="text-gray-300 font-medium capitalize">{project.websiteType} Website</p>
+                  </div>
+                </div>
 
-              {project.additionalNotes && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                >
+                {/* Features */}
+                <div>
                   <h3 className="text-sm font-medium text-purple-300 mb-2 flex items-center gap-2">
                     <span className="inline-block w-1 h-1 rounded-full bg-purple-500" />
-                    Additional Notes
+                    Requested Features
                   </h3>
-                  <p className="text-gray-300 bg-black/40 p-6 rounded-lg border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300">
-                    {project.additionalNotes}
-                  </p>
-                </motion.div>
-              )}
+                  <div className="bg-black/40 p-6 rounded-lg border border-purple-500/20">
+                    <div className="flex flex-wrap gap-2">
+                      {features.map((feature) => (
+                        <Badge
+                          key={feature}
+                          variant="outline"
+                          className="capitalize bg-purple-500/10"
+                        >
+                          {feature.replace(/-/g, ' ')}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Design Style */}
+                {project.designStyle && (
+                  <div>
+                    <h3 className="text-sm font-medium text-purple-300 mb-2 flex items-center gap-2">
+                      <span className="inline-block w-1 h-1 rounded-full bg-purple-500" />
+                      Design Style
+                    </h3>
+                    <div className="bg-black/40 p-6 rounded-lg border border-purple-500/20">
+                      <p className="text-gray-300 capitalize">{project.designStyle.replace(/-/g, ' ')}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Design Preferences */}
+                {project.designPreferences && (
+                  <div>
+                    <h3 className="text-sm font-medium text-purple-300 mb-2 flex items-center gap-2">
+                      <span className="inline-block w-1 h-1 rounded-full bg-purple-500" />
+                      Design Preferences
+                    </h3>
+                    <div className="bg-black/40 p-6 rounded-lg border border-purple-500/20">
+                      <p className="text-gray-300">{project.designPreferences}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Design Inspiration */}
+                {project.designInspiration && (
+                  <div>
+                    <h3 className="text-sm font-medium text-purple-300 mb-2 flex items-center gap-2">
+                      <span className="inline-block w-1 h-1 rounded-full bg-purple-500" />
+                      Design Inspiration
+                    </h3>
+                    <div className="bg-black/40 p-6 rounded-lg border border-purple-500/20">
+                      <p className="text-gray-300">{project.designInspiration}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Brand Colors */}
+                {project.brandColors && (
+                  <div>
+                    <h3 className="text-sm font-medium text-purple-300 mb-2 flex items-center gap-2">
+                      <span className="inline-block w-1 h-1 rounded-full bg-purple-500" />
+                      Brand Colors
+                    </h3>
+                    <div className="bg-black/40 p-6 rounded-lg border border-purple-500/20">
+                      <p className="text-gray-300">{project.brandColors}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Timeline */}
+                {project.timeline && (
+                  <div>
+                    <h3 className="text-sm font-medium text-purple-300 mb-2 flex items-center gap-2">
+                      <span className="inline-block w-1 h-1 rounded-full bg-purple-500" />
+                      Preferred Timeline
+                    </h3>
+                    <div className="bg-black/40 p-6 rounded-lg border border-purple-500/20">
+                      <p className="text-gray-300 capitalize">{project.timeline.replace(/-/g, ' ')}</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Additional Notes */}
+                {project.additionalNotes && (
+                  <div>
+                    <h3 className="text-sm font-medium text-purple-300 mb-2 flex items-center gap-2">
+                      <span className="inline-block w-1 h-1 rounded-full bg-purple-500" />
+                      Additional Notes
+                    </h3>
+                    <div className="bg-black/40 p-6 rounded-lg border border-purple-500/20">
+                      <p className="text-gray-300">{project.additionalNotes}</p>
+                    </div>
+                  </div>
+                )}
+              </motion.div>
             </CardContent>
           </Card>
         </TabsContent>

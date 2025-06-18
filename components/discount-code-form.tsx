@@ -6,30 +6,43 @@ import { Input } from "@/components/ui/input"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2, Tag, Check } from "lucide-react"
 import { getDiscountCode, applyDiscountCode, type DiscountCode } from "@/lib/firebase"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import * as z from "zod"
+
+const discountCodeSchema = z.object({
+  code: z.string().min(1, "Discount code is required"),
+})
 
 interface DiscountCodeFormProps {
   onApplyDiscount: (discount: DiscountCode) => void
+  userEmail: string // Add this prop
 }
 
-export default function DiscountCodeForm({ onApplyDiscount }: DiscountCodeFormProps) {
-  const [code, setCode] = useState("")
+export function DiscountCodeForm({ onApplyDiscount, userEmail }: DiscountCodeFormProps) {
   const [loading, setLoading] = useState(false)
   const [appliedDiscount, setAppliedDiscount] = useState<DiscountCode | null>(null)
   const { toast } = useToast()
 
-  const handleApplyCode = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<z.infer<typeof discountCodeSchema>>({
+    resolver: zodResolver(discountCodeSchema),
+  })
 
-    if (!code.trim()) return
+  const handleApplyCode = async (data: z.infer<typeof discountCodeSchema>) => {
+    const { code } = data
 
     try {
       setLoading(true)
-      const discountCode = await getDiscountCode(code.trim())
+      const discountCode = await getDiscountCode(code.trim(), userEmail) // Pass userEmail here
 
       if (!discountCode) {
         toast({
           title: "Invalid Code",
-          description: "This discount code is invalid, expired, or has reached its usage limit.",
+          description: "This discount code is invalid, expired, has reached its usage limit, or is not available for your account.",
           variant: "destructive",
         })
         return
@@ -37,15 +50,12 @@ export default function DiscountCodeForm({ onApplyDiscount }: DiscountCodeFormPr
 
       // Apply the discount and increment usage counter
       await applyDiscountCode(discountCode.id)
-
       setAppliedDiscount(discountCode)
       onApplyDiscount(discountCode)
 
       toast({
         title: "Discount Applied",
-        description:
-          `${discountCode.percentage}% discount has been applied to your order. ` +
-          (discountCode.description ? `(${discountCode.description})` : ""),
+        description: `${discountCode.percentage}% discount has been applied to your order.`,
       })
     } catch (error: any) {
       toast({
@@ -70,18 +80,17 @@ export default function DiscountCodeForm({ onApplyDiscount }: DiscountCodeFormPr
           </span>
         </div>
       ) : (
-        <form onSubmit={handleApplyCode} className="flex gap-2">
+        <form onSubmit={handleSubmit(handleApplyCode)} className="flex gap-2">
           <div className="relative flex-1">
             <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Enter discount code"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
+              {...register("code")}
               className="pl-9 bg-black/50 border-purple-500/30 focus:border-purple-500"
               disabled={loading}
             />
           </div>
-          <Button type="submit" disabled={loading || !code.trim()}>
+          <Button type="submit" disabled={loading}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
           </Button>
         </form>
@@ -89,3 +98,9 @@ export default function DiscountCodeForm({ onApplyDiscount }: DiscountCodeFormPr
     </div>
   )
 }
+
+// If using named export
+// import { DiscountCodeForm } from "@/components/discount-code-form"
+
+// Or if using default export
+// import DiscountCodeForm from "@/components/discount-code-form"

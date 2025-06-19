@@ -50,7 +50,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <img
-              src="/Images/ARPK_Logo.png"
+              src="/Images/ARPK_Official_Logo.png"
               alt="ARPK Logo"
               className="h-12 w-auto" // Adjust height as needed
               style={{

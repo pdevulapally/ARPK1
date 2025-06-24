@@ -2,55 +2,41 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Code, Zap, Shield, ChevronRight, Award, Users, Globe } from "lucide-react"
 import Spline from '@splinetool/react-spline'
+import Navbar from "@/components/navbar"
+import { HeroSection } from "@/components/ui/hero-section"
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-900">
+      <Navbar />
       {/* Navbar Accent Line */}
       <div className="h-1 bg-gradient-to-r from-purple-600 via-violet-500 to-indigo-600 w-full" />
 
       {/* Hero Section - with Spline 3D */}
-      <section className="relative pt-36 pb-24 md:pt-48 md:pb-32 overflow-hidden">
-        {/* Spline Background */}
-        <div className="absolute inset-0 z-0">
-          <Spline 
-            scene="https://prod.spline.design/Gqncpqdr6VRaRJ7u/scene.splinecode"
-            className="w-full h-full"
-          />
-        </div>
-        
-        {/* Remove or comment out the old gradient backgrounds */}
-        {/* <div className="absolute inset-0 bg-[radial-gradient(...)]" /> */}
-        {/* <div className="absolute -top-24 -right-24 w-96 h-96 bg-purple-600/5..." /> */}
-        {/* <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-600/5..." /> */}
-
-        <div className="container mx-auto px-4 relative z-10">
-          {/* Rest of your hero content remains the same */}
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-block mb-4 px-4 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300 text-sm font-medium">
-              Transforming Digital Experiences Since 2018
-            </div>
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-purple-700 via-violet-600 to-indigo-700 dark:from-purple-400 dark:via-violet-400 dark:to-indigo-400 leading-tight">
-              Your Vision, Our Code
-            </h1>
-            <p className="text-xl md:text-2xl text-gray-700 dark:text-gray-300 mb-10 leading-relaxed">
-              ARPK Studio delivers meticulously designed websites that captivate your audience, elevate your brand, and drive exceptional results.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-5">
-              <Link href="/request" className="w-full sm:w-auto">
-                <Button className="w-full bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-800 hover:to-indigo-800 dark:from-purple-600 dark:to-indigo-600 text-white px-10 py-7 text-lg font-medium rounded-lg shadow-lg hover:shadow-purple-500/20 transition-all duration-300">
-                  Request a Website <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-              <Link href="/portfolio" className="w-full sm:w-auto">
-                <Button variant="outline" className="w-full px-10 py-7 text-lg font-medium rounded-lg border-2 border-gray-300 dark:border-gray-700 hover:border-purple-500 dark:hover:border-purple-500 transition-all duration-300">
-                   View Our Portfolio
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
+      <div className="relative">
+        <HeroSection
+          title="Professional Web Development"
+          subtitle={{
+            regular: "Transform your business with ",
+            gradient: "stunning digital experiences",
+          }}
+          description="We create high-performance websites that drive results. From concept to launch, ARPK delivers exceptional web solutions tailored to your business needs."
+          ctaText="Start Your Project"
+          ctaHref="/request"
+          bottomImage={{
+            light:
+              "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/left-screen-dvpjBekyOBAr1EoMvRgjOTsrRZdTZC.png",
+            dark: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/left-screen-dvpjBekyOBAr1EoMvRgjOTsrRZdTZC.png",
+          }}
+          gridOptions={{
+            angle: 65,
+            opacity: 0.3,
+            cellSize: 50,
+            lightLineColor: "#4a4a4a",
+            darkLineColor: "#2a2a2a",
+          }}
+        />
+      </div>
 
       {/* Trusted By Section */}
       <section className="py-12 bg-gray-50 dark:bg-gray-900/50 border-y border-gray-100 dark:border-gray-800 overflow-hidden">

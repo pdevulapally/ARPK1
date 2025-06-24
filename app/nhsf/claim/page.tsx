@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import Image from "next/image"
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "framer-motion"
-import { ArrowRight, Check, Globe, Users, Calendar, Gift, ArrowDown, Mail, Sparkles, Star, Zap, Eye, Shield, Rocket } from "lucide-react"
+import { ArrowRight, Check, Globe, Users, Calendar, ArrowDown, Mail, Sparkles, Star, Zap, Eye, Shield, Rocket, ChevronRight, Phone, MapPin, ExternalLink, Flower2, CircleDot } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface SocietyFormData {
@@ -25,17 +25,15 @@ export default function PremiumNHSFClaimPage() {
   const containerRef = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({ target: containerRef })
   
-  const y1 = useTransform(scrollYProgress, [0, 1], [0, -200])
-  const y2 = useTransform(scrollYProgress, [0, 1], [0, -400])
-  const rotate = useTransform(scrollYProgress, [0, 1], [0, 360])
-  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 1.1])
+  const y1 = useTransform(scrollYProgress, [0, 1], [0, -100])
+  const y2 = useTransform(scrollYProgress, [0, 1], [0, -200])
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 1.05])
   
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [activeSection, setActiveSection] = useState(0)
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [currentStep, setCurrentStep] = useState(0)
-  const [isVisible, setIsVisible] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const [isTablet, setIsTablet] = useState(false)
   
   const [formData, setFormData] = useState<SocietyFormData>({
     societyName: "",
@@ -55,31 +53,24 @@ export default function PremiumNHSFClaimPage() {
   useEffect(() => {
     setMounted(true)
     
-    const handleScroll = () => {
-      if (window.scrollY > 100) {
-        setIsVisible(true)
-      }
+    const checkDevice = () => {
+      const width = window.innerWidth
+      setIsMobile(width < 640)
+      setIsTablet(width >= 640 && width < 1024)
     }
-
-    // Only add event listener after component mounts
-    if (typeof window !== 'undefined') {
-      window.addEventListener('scroll', handleScroll)
-      return () => window.removeEventListener('scroll', handleScroll)
+    
+    checkDevice()
+    window.addEventListener('resize', checkDevice)
+    
+    return () => {
+      window.removeEventListener('resize', checkDevice)
     }
-  }, [])
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY })
-    }
-    window.addEventListener('mousemove', handleMouseMove)
-    return () => window.removeEventListener('mousemove', handleMouseMove)
   }, [])
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentStep((prev) => (prev + 1) % 4)
-    }, 3000)
+    }, 4000)
     return () => clearInterval(timer)
   }, [])
 
@@ -94,119 +85,167 @@ export default function PremiumNHSFClaimPage() {
     // Handle success
   }
 
-  const scrollToForm = () => {
-    const element = document.getElementById('claim-form')
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' })
-    }
-  }
-
   const features = [
-    { icon: Globe, text: "Professional website with modern design", color: "from-purple-500 to-pink-500" },
-    { icon: Users, text: "Committee profiles and event management", color: "from-blue-500 to-purple-500" },
-    { icon: Calendar, text: "Event calendar and booking system", color: "from-purple-500 to-indigo-500" },
-    { icon: Gift, text: "Free domain for one year", color: "from-pink-500 to-purple-500" },
+    { 
+      icon: Globe, 
+      text: "Professional Website", 
+      subtitle: "Modern responsive design",
+      desc: "Beautiful, culturally-inspired design that represents your society's values" 
+    },
+    { 
+      icon: Users, 
+      text: "Committee Management", 
+      subtitle: "Profiles & event system",
+      desc: "Easy management of committee members and society activities" 
+    },
+    { 
+      icon: Calendar, 
+      text: "Event Calendar", 
+      subtitle: "Booking & scheduling",
+      desc: "Integrated calendar for seamless event planning and management" 
+    },
   ]
 
   const timelineSteps = [
-    { title: "Submission", desc: "Submit your requirements", icon: Mail },
-    { title: "Review", desc: "48-hour review process", icon: Eye },
-    { title: "Development", desc: "2-3 weeks build time", icon: Rocket },
-    { title: "Launch", desc: "Ready for the new term", icon: Star }
+    { title: "Submit", desc: "Requirements", icon: Mail, duration: "24h" },
+    { title: "Review", desc: "48h process", icon: Eye, duration: "2 days" },
+    { title: "Build", desc: "2-3 weeks", icon: Rocket, duration: "2-3 weeks" },
+    { title: "Launch", desc: "Go live", icon: Star, duration: "Immediate" }
   ]
 
   // Prevent SSR rendering of client-side features
   if (!mounted) {
-    return null // or a loading state
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-orange-900/20 to-slate-900 flex items-center justify-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+          className="w-12 h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full"
+        />
+      </div>
+    )
   }
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950/30 to-slate-950 overflow-hidden">
-     
-
-      {/* Animated Background Elements */}
+    <div ref={containerRef} className="min-h-screen bg-gradient-to-br from-slate-900 via-orange-900/20 to-slate-900 overflow-hidden">
+      {/* Subtle Background Elements */}
       <div className="fixed inset-0 pointer-events-none">
         <motion.div
           style={{ y: y1 }}
-          className="absolute top-20 left-10 w-32 h-32 md:w-64 md:h-64 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full blur-3xl"
+          className="absolute top-20 left-4 md:left-10 w-32 h-32 md:w-64 md:h-64 bg-gradient-to-r from-orange-500/10 to-red-500/10 rounded-full blur-3xl"
         />
         <motion.div
-          style={{ y: y2, rotate }}
-          className="absolute bottom-20 right-10 w-40 h-40 md:w-80 md:h-80 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{ 
-            x: mousePosition.x / 50,
-            y: mousePosition.y / 50,
-          }}
-          className="absolute top-1/2 left-1/2 w-96 h-96 bg-gradient-radial from-purple-500/10 to-transparent rounded-full blur-2xl transform -translate-x-1/2 -translate-y-1/2"
+          style={{ y: y2 }}
+          className="absolute bottom-20 right-4 md:right-10 w-40 h-40 md:w-80 md:h-80 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 rounded-full blur-3xl"
         />
       </div>
 
-      {/* Floating Particles */}
+      {/* Subtle Floating Elements */}
       <div className="fixed inset-0 pointer-events-none">
-        {[...Array(20)].map((_, i) => (
+        {[...Array(isMobile ? 3 : isTablet ? 5 : 8)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-1 h-1 bg-purple-400/60 rounded-full"
+            className="absolute w-2 h-2 bg-orange-400/20 rounded-full"
             initial={{ 
-              x: Math.random() * window.innerWidth, 
-              y: Math.random() * window.innerHeight 
+              x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000), 
+              y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000) 
             }}
             animate={{
-              y: [null, -20, 0],
+              y: [null, -30, 0],
               opacity: [0, 1, 0],
             }}
             transition={{
-              duration: 3 + Math.random() * 2,
+              duration: 6 + Math.random() * 3,
               repeat: Infinity,
-              delay: Math.random() * 5
+              delay: Math.random() * 8
             }}
           />
         ))}
       </div>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <section className="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-16">
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.2, ease: "easeOut" }}
           className="text-center max-w-4xl mx-auto"
         >
-          {/* 3D Logo Effect */}
+          {/* Logo Section */}
           <motion.div
             style={{ scale }}
-            className="relative mb-8"
+            className="relative mb-8 md:mb-12"
           >
+            <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 mb-8">
+              {/* NHSF Logo */}
+              <motion.div
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3, duration: 0.8 }}
+                className="relative"
+              >
+                <Image 
+                  src="/Images/-zBWNK3W_400x400-removebg-preview.png" 
+                  alt="NHSF Logo" 
+                  width={128} 
+                  height={128} 
+                  className="w-32 h-32 md:w-40 md:h-40 object-contain"
+                />
+                <div className="mt-4">
+                  <h3 className="text-lg md:text-xl font-bold text-white">NHSF</h3>
+                  <p className="text-orange-300 text-sm">National Hindu Students Forum</p>
+                </div>
+              </motion.div>
+
+              {/* Partnership Symbol */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.6, duration: 0.8 }}
+                className="hidden md:flex items-center"
+              >
+                <div className="w-16 h-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-full" />
+                <CircleDot className="w-8 h-8 text-orange-400 mx-4" />
+                <div className="w-16 h-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-full" />
+              </motion.div>
+
+              {/* ARPK Logo */}
+              <motion.div
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3, duration: 0.8 }}
+                className="relative"
+              >
+                <div className="w-24 h-24 md:w-32 md:h-32 bg-gradient-to-br from-blue-600 to-purple-700 rounded-2xl flex items-center justify-center shadow-2xl shadow-blue-500/20">
+                  <Globe className="w-12 h-12 md:w-16 md:h-16 text-white" />
+                </div>
+                <div className="mt-4">
+                  <h3 className="text-lg md:text-xl font-bold text-white">ARPK</h3>
+                  <p className="text-blue-300 text-sm">Digital Excellence</p>
+                </div>
+              </motion.div>
+            </div>
+
             <motion.h1 
-              className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-purple-600 leading-tight"
+              className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-red-400 to-orange-600 leading-tight mb-6"
               animate={{ 
                 backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
               }}
-              transition={{ duration: 5, repeat: Infinity }}
+              transition={{ duration: 8, repeat: Infinity }}
               style={{ 
                 backgroundSize: "200% 200%",
-                textShadow: "0 0 40px rgba(168, 85, 247, 0.5)"
+                textShadow: "0 0 30px rgba(251, 146, 60, 0.3)"
               }}
             >
-              NHSF × ARPK
+              Digital Dharma Initiative
             </motion.h1>
-            <motion.div
-              className="absolute -inset-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 blur-2xl rounded-full"
-              animate={{ 
-                scale: [1, 1.1, 1],
-                opacity: [0.3, 0.6, 0.3]
-              }}
-              transition={{ duration: 3, repeat: Infinity }}
-            />
           </motion.div>
 
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.8 }}
-            className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-6"
+            transition={{ delay: 0.9, duration: 0.8 }}
+            className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-4 md:mb-6"
           >
             Free Website Initiative
           </motion.h2>
@@ -214,47 +253,37 @@ export default function PremiumNHSFClaimPage() {
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.8 }}
-            className="text-lg sm:text-xl text-gray-300 mb-12 max-w-2xl mx-auto leading-relaxed"
+            transition={{ delay: 1.2, duration: 0.8 }}
+            className="text-base sm:text-lg md:text-xl text-gray-300 mb-8 md:mb-12 max-w-3xl mx-auto leading-relaxed px-4"
           >
-            Empowering Hindu Student Societies with professional web presence. 
+            Empowering Hindu Student Societies with professional web presence that reflects our cultural values and modern excellence. 
             Exclusively for NHSF committee members 2024-2025.
           </motion.p>
 
-          {/* Premium Feature Cards */}
+          {/* Feature Cards */}
           <motion.div 
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9, duration: 1 }}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-12"
+            transition={{ delay: 1.5, duration: 1 }}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 md:mb-12"
           >
             {features.map((feature, index) => (
               <motion.div
                 key={index}
                 whileHover={{ 
-                  scale: 1.05,
-                  rotateY: 5,
-                  z: 50
+                  scale: 1.02,
+                  y: -5
                 }}
-                whileTap={{ scale: 0.95 }}
+                whileTap={{ scale: 0.98 }}
                 className="relative group cursor-pointer"
-                style={{ perspective: "1000px" }}
               >
-                <div className="relative bg-black/60 backdrop-blur-2xl p-6 rounded-2xl border border-purple-500/30 hover:border-purple-400/60 transition-all duration-500">
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  
-                  <div className="relative flex items-center gap-4">
-                    <motion.div 
-                      className={`w-12 h-12 rounded-2xl bg-gradient-to-r ${feature.color} p-0.5 group-hover:scale-110 transition-transform duration-300`}
-                      whileHover={{ rotate: 360 }}
-                      transition={{ duration: 0.6 }}
-                    >
-                      <div className="w-full h-full bg-black/80 rounded-2xl flex items-center justify-center">
-                        <feature.icon className="w-6 h-6 text-white" />
-                      </div>
-                    </motion.div>
-                    <span className="text-white font-medium text-sm sm:text-base">{feature.text}</span>
+                <div className="flex flex-col items-center justify-between h-full bg-black/40 rounded-2xl border border-orange-500/30 p-6 transition-all duration-300 hover:border-orange-400/60">
+                  <div className="flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-orange-500/20 to-red-500/20 mb-4">
+                    <feature.icon className="w-8 h-8 text-orange-400" />
                   </div>
+                  <h3 className="text-xl font-bold text-white text-center mb-1">{feature.text}</h3>
+                  <div className="text-orange-300 font-semibold text-sm text-center mb-2">{feature.subtitle}</div>
+                  <p className="text-gray-400 text-center text-sm">{feature.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -264,19 +293,20 @@ export default function PremiumNHSFClaimPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 1.2, duration: 0.8 }}
+            transition={{ delay: 1.8, duration: 0.8 }}
+            className="px-4"
           >
             <motion.button
-              whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(168, 85, 247, 0.4)" }}
+              whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(251, 146, 60, 0.3)" }}
               whileTap={{ scale: 0.95 }}
               onClick={() => document.getElementById('claim-form')?.scrollIntoView({ behavior: 'smooth' })}
-              className="group relative bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-2xl hover:shadow-purple-500/40 transition-all duration-300"
+              className="group relative bg-gradient-to-r from-orange-600 via-orange-700 to-red-600 text-white px-8 md:px-10 py-4 md:py-5 rounded-2xl font-semibold text-lg md:text-xl shadow-2xl hover:shadow-orange-500/30 transition-all duration-300 w-full sm:w-auto"
             >
-              <span className="relative z-10 flex items-center gap-2">
+              <span className="relative z-10 flex items-center justify-center gap-3">
                 Claim Your Website
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-5 h-5 md:w-6 md:h-6 group-hover:translate-x-1 transition-transform" />
               </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </motion.button>
           </motion.div>
 
@@ -284,29 +314,29 @@ export default function PremiumNHSFClaimPage() {
           <motion.div 
             animate={{ y: [0, 10, 0] }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="mt-16"
+            className="mt-12 md:mt-16"
           >
-            <ArrowDown className="w-6 h-6 text-purple-400 mx-auto" />
+            <ArrowDown className="w-6 h-6 text-orange-400 mx-auto" />
           </motion.div>
         </motion.div>
       </section>
 
       {/* About Section */}
-      <section className="relative py-20 px-4 sm:px-6 lg:px-8">
+      <section className="relative py-16 md:py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="text-center mb-16"
+            className="text-center mb-12 md:mb-16"
           >
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-6">
-              Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">ARPK?</span>
+              Why Choose <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-400">ARPK?</span>
             </h2>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             <motion.div
               initial={{ opacity: 0, x: -40 }}
               whileInView={{ opacity: 1, x: 0 }}
@@ -314,21 +344,20 @@ export default function PremiumNHSFClaimPage() {
               transition={{ duration: 0.8 }}
               className="space-y-6"
             >
-              <div className="bg-black/40 backdrop-blur-2xl p-8 rounded-3xl border border-purple-500/20">
-                <h3 className="text-2xl font-bold text-white mb-4 flex items-center gap-3">
-                  <Sparkles className="w-6 h-6 text-purple-400" />
+              <div className="bg-black/40 backdrop-blur-xl p-6 md:p-8 rounded-3xl border border-orange-500/20">
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6 flex items-center gap-3">
+                  <Sparkles className="w-6 h-6 text-orange-400" />
                   About ARPK
                 </h3>
-                <p className="text-gray-300 leading-relaxed mb-4">
+                <p className="text-gray-300 leading-relaxed mb-4 text-sm md:text-base">
                   ARPK is a leading web development company specializing in creating 
-                  modern, responsive websites for businesses and organizations. With years 
-                  of experience and a passion for excellence, we're committed to delivering 
-                  high-quality digital solutions.
+                  modern, responsive websites that blend cultural heritage with digital innovation. 
+                  We understand the importance of representing your values authentically online.
                 </p>
-                <p className="text-gray-300 leading-relaxed">
+                <p className="text-gray-300 leading-relaxed text-sm md:text-base">
                   Our partnership with NHSF reflects our commitment to supporting 
-                  student organizations and fostering digital growth in the Hindu 
-                  student community.
+                  Hindu student organizations and fostering digital growth while preserving 
+                  our cultural identity.
                 </p>
               </div>
             </motion.div>
@@ -340,9 +369,9 @@ export default function PremiumNHSFClaimPage() {
               transition={{ duration: 0.8, delay: 0.2 }}
               className="space-y-6"
             >
-              <div className="bg-black/40 backdrop-blur-2xl p-8 rounded-3xl border border-purple-500/20">
-                <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                  <Zap className="w-6 h-6 text-purple-400" />
+              <div className="bg-black/40 backdrop-blur-xl p-6 md:p-8 rounded-3xl border border-orange-500/20">
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                  <Zap className="w-6 h-6 text-orange-400" />
                   Initiative Benefits
                 </h3>
                 <div className="space-y-4">
@@ -358,12 +387,12 @@ export default function PremiumNHSFClaimPage() {
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
                       transition={{ delay: 0.1 * index }}
-                      className="flex items-center gap-3"
+                      className="flex items-start gap-3"
                     >
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0">
-                        <Check className="w-4 h-4 text-white" />
+                      <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gradient-to-r from-orange-500 to-red-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Check className="w-3 h-3 md:w-4 md:h-4 text-white" />
                       </div>
-                      <span className="text-gray-300">{item}</span>
+                      <span className="text-gray-300 text-sm md:text-base">{item}</span>
                     </motion.div>
                   ))}
                 </div>
@@ -374,7 +403,7 @@ export default function PremiumNHSFClaimPage() {
       </section>
 
       {/* Claim Form Section */}
-      <section id="claim-form" className="relative py-20 px-4 sm:px-6 lg:px-8">
+      <section id="claim-form" className="relative py-16 md:py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
@@ -383,7 +412,7 @@ export default function PremiumNHSFClaimPage() {
             className="text-center mb-12"
           >
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-              Claim Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Free Website</span>
+              Claim Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-400">Free Website</span>
             </h2>
             <p className="text-gray-300 text-lg">
               Fill out the form below to start your journey towards a professional web presence.
@@ -399,9 +428,9 @@ export default function PremiumNHSFClaimPage() {
             className="space-y-8"
           >
             {/* Society Details */}
-            <div className="bg-black/40 backdrop-blur-2xl p-6 sm:p-8 rounded-3xl border border-purple-500/20">
+            <div className="bg-black/40 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-orange-500/20">
               <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-3">
-                <Users className="w-5 h-5 text-purple-400" />
+                <Users className="w-5 h-5 text-orange-400" />
                 Society Details
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -428,7 +457,7 @@ export default function PremiumNHSFClaimPage() {
                       placeholder={field.placeholder}
                       value={formData[field.id as keyof SocietyFormData]}
                       onChange={(e) => setFormData({...formData, [field.id]: e.target.value})}
-                      className="w-full px-4 py-3 bg-black/60 border border-purple-500/30 rounded-xl text-white placeholder-gray-400 focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 focus:outline-none transition-all duration-300"
+                      className="w-full px-4 py-3 bg-black/60 border border-orange-500/30 rounded-xl text-white placeholder-gray-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 focus:outline-none transition-all duration-300"
                       required
                     />
                   </motion.div>
@@ -437,9 +466,9 @@ export default function PremiumNHSFClaimPage() {
             </div>
 
             {/* Website Requirements */}
-            <div className="bg-black/40 backdrop-blur-2xl p-6 sm:p-8 rounded-3xl border border-purple-500/20">
+            <div className="bg-black/40 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-orange-500/20">
               <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-3">
-                <Globe className="w-5 h-5 text-purple-400" />
+                <Globe className="w-5 h-5 text-orange-400" />
                 Website Requirements
               </h3>
               <div className="space-y-6">
@@ -453,7 +482,7 @@ export default function PremiumNHSFClaimPage() {
                       placeholder="e.g. Orange (#FF9900)"
                       value={formData.primaryColor}
                       onChange={(e) => setFormData({...formData, primaryColor: e.target.value})}
-                      className="w-full px-4 py-3 bg-black/60 border border-purple-500/30 rounded-xl text-white placeholder-gray-400 focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 focus:outline-none transition-all duration-300"
+                      className="w-full px-4 py-3 bg-black/60 border border-orange-500/30 rounded-xl text-white placeholder-gray-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 focus:outline-none transition-all duration-300"
                     />
                   </div>
                   <div className="space-y-2">
@@ -465,7 +494,7 @@ export default function PremiumNHSFClaimPage() {
                       placeholder="e.g. Blue (#0066CC)"
                       value={formData.secondaryColor}
                       onChange={(e) => setFormData({...formData, secondaryColor: e.target.value})}
-                      className="w-full px-4 py-3 bg-black/60 border border-purple-500/30 rounded-xl text-white placeholder-gray-400 focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 focus:outline-none transition-all duration-300"
+                      className="w-full px-4 py-3 bg-black/60 border border-orange-500/30 rounded-xl text-white placeholder-gray-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 focus:outline-none transition-all duration-300"
                     />
                   </div>
                 </div>
@@ -484,7 +513,7 @@ export default function PremiumNHSFClaimPage() {
                       placeholder={field.placeholder}
                       value={formData[field.id as keyof SocietyFormData]}
                       onChange={(e) => setFormData({...formData, [field.id]: e.target.value})}
-                      className="w-full px-4 py-3 bg-black/60 border border-purple-500/30 rounded-xl text-white placeholder-gray-400 focus:border-purple-400 focus:ring-2 focus:ring-purple-400/20 focus:outline-none transition-all duration-300 min-h-[100px] resize-none"
+                      className="w-full px-4 py-3 bg-black/60 border border-orange-500/30 rounded-xl text-white placeholder-gray-400 focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 focus:outline-none transition-all duration-300 min-h-[100px] resize-none"
                       required={index < 2}
                     />
                   </div>
@@ -499,7 +528,7 @@ export default function PremiumNHSFClaimPage() {
                 disabled={isSubmitting}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="relative bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-2xl hover:shadow-purple-500/40 transition-all duration-300 disabled:opacity-50"
+                className="relative bg-gradient-to-r from-orange-600 via-orange-700 to-red-600 text-white px-8 py-4 rounded-2xl font-semibold text-lg shadow-2xl hover:shadow-orange-500/30 transition-all duration-300 disabled:opacity-50"
               >
                 <AnimatePresence mode="wait">
                   {isSubmitting ? (
@@ -537,7 +566,7 @@ export default function PremiumNHSFClaimPage() {
       </section>
 
       {/* Timeline Section */}
-      <section className="relative py-20 px-4 sm:px-6 lg:px-8">
+      <section className="relative py-16 md:py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
@@ -546,7 +575,7 @@ export default function PremiumNHSFClaimPage() {
             className="text-center mb-16"
           >
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-              Development <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Timeline</span>
+              Development <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-400">Timeline</span>
             </h2>
           </motion.div>
 
@@ -561,35 +590,36 @@ export default function PremiumNHSFClaimPage() {
                 className="relative group"
               >
                 <motion.div
-                  whileHover={{ scale: 1.05, rotateY: 5 }}
-                  className={`bg-black/40 backdrop-blur-2xl p-6 rounded-3xl border transition-all duration-500 ${
+                  whileHover={{ scale: 1.02 }}
+                  className={`bg-black/40 backdrop-blur-xl p-6 rounded-3xl border transition-all duration-500 ${
                     currentStep === index 
-                      ? 'border-purple-400 shadow-2xl shadow-purple-500/20' 
-                      : 'border-purple-500/20'
+                      ? 'border-orange-400 shadow-2xl shadow-orange-500/20' 
+                      : 'border-orange-500/20'
                   }`}
                 >
                   <div className="flex flex-col items-center text-center space-y-4">
                     <motion.div
-                      animate={currentStep === index ? { scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] } : {}}
+                      animate={currentStep === index ? { scale: [1, 1.1, 1] } : {}}
                       transition={{ duration: 2, repeat: Infinity }}
                       className={`w-16 h-16 rounded-2xl bg-gradient-to-r flex items-center justify-center ${
                         currentStep === index
-                          ? 'from-purple-500 to-pink-500 shadow-lg shadow-purple-500/50'
-                          : 'from-purple-600/50 to-purple-800/50'
+                          ? 'from-orange-500 to-red-600 shadow-lg shadow-orange-500/50'
+                          : 'from-orange-600/50 to-orange-800/50'
                       }`}
                     >
                       <step.icon className="w-8 h-8 text-white" />
                     </motion.div>
                     <div>
                       <h3 className="text-lg font-semibold text-white mb-2">{step.title}</h3>
-                      <p className="text-gray-400 text-sm">{step.desc}</p>
+                      <p className="text-gray-400 text-sm mb-1">{step.desc}</p>
+                      <p className="text-orange-400 text-sm font-medium">{step.duration}</p>
                     </div>
                   </div>
                 </motion.div>
                 
                 {index < timelineSteps.length - 1 && (
                   <div className="hidden lg:block absolute top-1/2 -right-3 transform -translate-y-1/2 z-10">
-                    <ArrowRight className="w-6 h-6 text-purple-500" />
+                    <ArrowRight className="w-6 h-6 text-orange-500" />
                   </div>
                 )}
               </motion.div>
@@ -599,7 +629,7 @@ export default function PremiumNHSFClaimPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="relative py-20 px-4 sm:px-6 lg:px-8 bg-black/20 backdrop-blur-xl">
+      <section className="relative py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-black/20 backdrop-blur-xl">
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 40 }}
@@ -608,7 +638,7 @@ export default function PremiumNHSFClaimPage() {
             className="text-center mb-16"
           >
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-              Frequently Asked <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">Questions</span>
+              Frequently Asked <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-400">Questions</span>
             </h2>
           </motion.div>
 
@@ -620,7 +650,7 @@ export default function PremiumNHSFClaimPage() {
               },
               {
                 q: "What's included in the free website?",
-                a: "Your website will include modern design, mobile responsiveness, event management system, committee profiles, and one year of free hosting."
+                a: "Your website will include modern design, mobile responsiveness, event management system, and committee profiles."
               },
               {
                 q: "How long does development take?",
@@ -637,11 +667,11 @@ export default function PremiumNHSFClaimPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.1 * index }}
-                whileHover={{ scale: 1.02 }}
-                className="bg-black/40 backdrop-blur-2xl p-6 rounded-3xl border border-purple-500/20 hover:border-purple-400/40 transition-all duration-300"
+                whileHover={{ scale: 1.01 }}
+                className="bg-black/40 backdrop-blur-xl p-6 rounded-3xl border border-orange-500/20 hover:border-orange-400/40 transition-all duration-300"
               >
                 <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-3">
-                  <div className="w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full" />
+                  <div className="w-2 h-2 bg-gradient-to-r from-orange-400 to-red-400 rounded-full" />
                   {faq.q}
                 </h4>
                 <p className="text-gray-300 leading-relaxed pl-5">{faq.a}</p>
@@ -651,11 +681,11 @@ export default function PremiumNHSFClaimPage() {
         </div>
       </section>
 
-      {/* Premium Footer */}
-      <footer className="relative bg-black/60 backdrop-blur-2xl border-t border-purple-500/20">
-        <div className="absolute inset-0 bg-gradient-to-t from-purple-900/20 to-transparent" />
+      {/* Footer */}
+      <footer className="relative bg-black/60 backdrop-blur-2xl border-t border-orange-500/20">
+        <div className="absolute inset-0 bg-gradient-to-t from-orange-900/20 to-transparent" />
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -663,7 +693,7 @@ export default function PremiumNHSFClaimPage() {
               className="space-y-4"
             >
               <h3 className="text-xl font-semibold text-white flex items-center gap-3">
-                <Shield className="w-5 h-5 text-purple-400" />
+                <Shield className="w-5 h-5 text-orange-400" />
                 About Us
               </h3>
               <p className="text-gray-400 leading-relaxed">
@@ -675,7 +705,7 @@ export default function PremiumNHSFClaimPage() {
                   <motion.div
                     key={i}
                     whileHover={{ scale: 1.2, rotate: 15 }}
-                    className="w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"
+                    className="w-2 h-2 bg-gradient-to-r from-orange-400 to-red-400 rounded-full"
                   />
                 ))}
               </div>
@@ -689,21 +719,21 @@ export default function PremiumNHSFClaimPage() {
               className="space-y-4"
             >
               <h3 className="text-xl font-semibold text-white flex items-center gap-3">
-                <Mail className="w-5 h-5 text-purple-400" />
+                <Mail className="w-5 h-5 text-orange-400" />
                 Contact
               </h3>
               <div className="space-y-3">
                 {[
-                  { label: "Email", value: "info@arpk.co.uk" },
-                  { label: "Phone", value: "+44 123 456 7890" },
-                  { label: "Location", value: "United Kingdom" }
+                  { label: "Email", value: "info@arpk.co.uk", icon: Mail },
+                  { label: "Phone", value: "+44 123 456 7890", icon: Phone },
+                  { label: "Location", value: "United Kingdom", icon: MapPin }
                 ].map((contact, index) => (
                   <motion.div
                     key={index}
                     whileHover={{ x: 5 }}
-                    className="flex items-center gap-3 text-gray-400 hover:text-purple-400 transition-colors duration-300"
+                    className="flex items-center gap-3 text-gray-400 hover:text-orange-400 transition-colors duration-300"
                   >
-                    <div className="w-1 h-1 bg-purple-400 rounded-full" />
+                    <contact.icon className="w-4 h-4" />
                     <span className="text-sm font-medium">{contact.label}:</span>
                     <span className="text-sm">{contact.value}</span>
                   </motion.div>
@@ -719,7 +749,7 @@ export default function PremiumNHSFClaimPage() {
               className="space-y-4"
             >
               <h3 className="text-xl font-semibold text-white flex items-center gap-3">
-                <Rocket className="w-5 h-5 text-purple-400" />
+                <Rocket className="w-5 h-5 text-orange-400" />
                 Quick Links
               </h3>
               <div className="space-y-3">
@@ -734,15 +764,15 @@ export default function PremiumNHSFClaimPage() {
                     target={link.external ? "_blank" : undefined}
                     rel={link.external ? "noopener noreferrer" : undefined}
                     whileHover={{ x: 5, scale: 1.05 }}
-                    className="group flex items-center gap-3 text-purple-400 hover:text-purple-300 transition-all duration-300"
+                    className="group flex items-center gap-3 text-orange-400 hover:text-orange-300 transition-all duration-300"
                   >
                     <motion.div
                       whileHover={{ rotate: 45 }}
-                      className="w-2 h-2 bg-purple-400 rounded-full group-hover:bg-purple-300 transition-colors duration-300"
+                      className="w-2 h-2 bg-orange-400 rounded-full group-hover:bg-orange-300 transition-colors duration-300"
                     />
                     <span className="text-sm font-medium">{link.label}</span>
                     {link.external && (
-                      <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     )}
                   </motion.a>
                 ))}
@@ -755,7 +785,7 @@ export default function PremiumNHSFClaimPage() {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
-            className="mt-16 pt-8 border-t border-purple-500/20"
+            className="mt-16 pt-8 border-t border-orange-500/20"
           >
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
               <p className="text-gray-400 text-sm">
@@ -763,9 +793,8 @@ export default function PremiumNHSFClaimPage() {
               </p>
               <motion.div
                 whileHover={{ scale: 1.05 }}
-                className="flex items-center gap-2 text-sm text-purple-400"
+                className="flex items-center gap-2 text-sm text-orange-400"
               >
-                <Sparkles className="w-4 h-4" />
                 <span>Crafted with excellence</span>
               </motion.div>
             </div>
@@ -784,7 +813,7 @@ export default function PremiumNHSFClaimPage() {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="w-14 h-14 bg-gradient-to-r from-purple-600 to-purple-700 rounded-full shadow-2xl shadow-purple-500/40 flex items-center justify-center text-white hover:shadow-purple-500/60 transition-all duration-300"
+          className="w-14 h-14 bg-gradient-to-r from-orange-600 to-red-600 rounded-full shadow-2xl shadow-orange-500/40 flex items-center justify-center text-white hover:shadow-orange-500/60 transition-all duration-300"
         >
           <motion.div
             animate={{ y: [-2, 2, -2] }}

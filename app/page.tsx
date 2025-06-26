@@ -4,8 +4,48 @@ import { ArrowRight, Code, Zap, Shield, ChevronRight, Award, Users, Globe } from
 import Spline from '@splinetool/react-spline'
 import Navbar from "@/components/navbar"
 import { HeroSection } from "@/components/ui/hero-section"
+import { FeatureSteps } from "@/components/ui/feature-section"
 
 export default function Home() {
+  const features = [
+    { 
+      step: 'Feature 1', 
+      title: 'Responsive & Device-Optimized Designs',
+      content: 'Websites that look stunning on all screens', 
+      image: '/Images/left-screen.png' 
+    },
+    { 
+      step: 'Feature 2',
+      title: 'SEO & Performance Optimisation',
+      content: 'Speed-optimised and search-friendly websites from day one',
+      image: '/Images/SEOandOptimisation.png'
+    },
+    { 
+      step: 'Feature 3',
+      title: 'Custom Web Applications',
+      content: 'We build complex solutions tailored to your exact needs',
+      image: '/Images/middle-screen.png'
+    },
+    { 
+      step: 'Feature 4',
+      title: 'Direct with Developers 🔥',
+      content: 'No middlemen — communicate directly with the developer building your project',
+      image: '/Images/team-work.png'
+    },
+    { 
+      step: 'Feature 5',
+      title: 'E-Commerce Integration',
+      content: 'Sell anything with powerful online store setups',
+      image: '/Images/senjewels.png'
+    },
+    { 
+      step: 'Feature 6',
+      title: 'Ongoing Maintenance & Support',
+      content: 'We don\'t disappear after launch — we\'re here for updates and fixes',
+      image: '/Images/Maintainance.png'
+    },
+  ]
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-900">
       <Navbar />
@@ -16,6 +56,7 @@ export default function Home() {
       <div className="relative">
         <HeroSection
           title="Professional Web Development"
+          titleHref="/portfolio"
           subtitle={{
             regular: "Transform your business with ",
             gradient: "stunning digital experiences",
@@ -67,65 +108,17 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Features Section - Replaced with FeatureSteps */}
       <section className="py-24 md:py-32 bg-white dark:bg-gray-950 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
         <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-500/20 to-transparent" />
         
-        <div className="container mx-auto px-4">
-          <div className="max-w-lg mx-auto text-center mb-16">
-            <div className="inline-block mb-2 px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-xs font-semibold uppercase tracking-wider">
-              Services
-            </div>
-            <h2 className="text-3xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-white leading-tight">
-              Digital Solutions <span className="text-purple-600 dark:text-purple-400">Expertly Crafted</span> For You
-            </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400">
-              Our comprehensive suite of services designed to elevate your digital presence and drive business growth.
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-gray-50 dark:bg-gray-900 p-8 md:p-10 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 group hover:border-purple-200 dark:hover:border-purple-800/30 transition-all duration-300 hover:shadow-purple-500/5">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 dark:from-purple-600 dark:to-indigo-700 rounded-xl flex items-center justify-center mb-8 shadow-lg shadow-purple-500/20 group-hover:shadow-purple-500/30 transition-all duration-300">
-                <Code className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">Bespoke Development</h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6 text-lg">
-                Meticulous custom websites built from the ground up to align perfectly with your brand identity and business objectives.
-              </p>
-              <Link href="/services/development" className="flex items-center text-purple-600 dark:text-purple-400 font-medium group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors duration-300">
-                Learn more <ChevronRight className="ml-1 h-4 w-4" />
-              </Link>
-            </div>
-            
-            <div className="bg-gray-50 dark:bg-gray-900 p-8 md:p-10 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 group hover:border-purple-200 dark:hover:border-purple-800/30 transition-all duration-300 hover:shadow-purple-500/5">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 dark:from-purple-600 dark:to-indigo-700 rounded-xl flex items-center justify-center mb-8 shadow-lg shadow-purple-500/20 group-hover:shadow-purple-500/30 transition-all duration-300">
-                <Zap className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">Performance Excellence</h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6 text-lg">
-                Ultra-responsive websites optimized for speed, search engine visibility, and exceptional conversion rates.
-              </p>
-              <Link href="/services/optimization" className="flex items-center text-purple-600 dark:text-purple-400 font-medium group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors duration-300">
-                Learn more <ChevronRight className="ml-1 h-4 w-4" />
-              </Link>
-            </div>
-            
-            <div className="bg-gray-50 dark:bg-gray-900 p-8 md:p-10 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 group hover:border-purple-200 dark:hover:border-purple-800/30 transition-all duration-300 hover:shadow-purple-500/5">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 dark:from-purple-600 dark:to-indigo-700 rounded-xl flex items-center justify-center mb-8 shadow-lg shadow-purple-500/20 group-hover:shadow-purple-500/30 transition-all duration-300">
-                <Shield className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">Enterprise Security</h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6 text-lg">
-                Advanced protection systems safeguarding your digital assets and customer data against evolving threats.
-              </p>
-              <Link href="/services/security" className="flex items-center text-purple-600 dark:text-purple-400 font-medium group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors duration-300">
-                Learn more <ChevronRight className="ml-1 h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-        </div>
+        <FeatureSteps 
+          features={features}
+          title="Our Services & Features"
+          autoPlayInterval={4000}
+          imageHeight="h-[500px]"
+        />
       </section>
 
       {/* Why Choose Us Section */}

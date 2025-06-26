@@ -102,13 +102,18 @@ const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
               </h2>
               <p className="max-w-2xl mx-auto text-gray-600 dark:text-gray-300">{description}</p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6 w-full max-w-xl mx-auto">
-                <a
-                  href={ctaHref}
-                  className="inline-flex rounded-full text-center group items-center justify-center bg-gradient-to-tr from-zinc-300/20 via-purple-400/30 to-transparent dark:from-zinc-300/5 dark:via-purple-400/20 text-gray-900 dark:text-white border-input border-[1px] hover:bg-gradient-to-tr hover:from-zinc-300/30 hover:via-purple-400/40 hover:to-transparent dark:hover:from-zinc-300/10 dark:hover:via-purple-400/30 transition-all w-full sm:w-auto py-4 px-10 font-medium"
-                >
-                  {ctaText}
-                  <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-2" />
-                </a>
+                <span className="relative inline-block overflow-hidden rounded-full p-[1.5px] w-full sm:w-auto">
+                  <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
+                  <div className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-white dark:bg-gray-950 text-xs font-medium backdrop-blur-3xl">
+                    <a
+                      href={ctaHref}
+                      className="inline-flex rounded-full text-center group items-center justify-center w-full sm:w-auto py-4 px-10 font-medium bg-transparent text-gray-900 dark:text-white border-none"
+                    >
+                      {ctaText}
+                      <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-2" />
+                    </a>
+                  </div>
+                </span>
                 {secondaryCtaText && (
                   <a
                     href={secondaryCtaHref}

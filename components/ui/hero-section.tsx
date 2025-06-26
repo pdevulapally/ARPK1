@@ -1,6 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, ArrowRight, Mail } from "lucide-react"
 
 interface HeroSectionProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: string
@@ -12,6 +12,8 @@ interface HeroSectionProps extends React.HTMLAttributes<HTMLDivElement> {
   description?: string
   ctaText?: string
   ctaHref?: string
+  secondaryCtaText?: string
+  secondaryCtaHref?: string
   bottomImage?: {
     light: string
     dark: string
@@ -63,6 +65,8 @@ const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
       description = "Sed ut perspiciatis unde omnis iste natus voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae.",
       ctaText = "Browse courses",
       ctaHref = "#",
+      secondaryCtaText = "Learn more",
+      secondaryCtaHref = "#",
       bottomImage = {
         light: "https://farmui.vercel.app/dashboard-light.png",
         dark: "https://farmui.vercel.app/dashboard.png",
@@ -97,18 +101,22 @@ const HeroSection = React.forwardRef<HTMLDivElement, HeroSectionProps>(
                 </span>
               </h2>
               <p className="max-w-2xl mx-auto text-gray-600 dark:text-gray-300">{description}</p>
-              <div className="items-center justify-center gap-x-3 space-y-3 sm:flex sm:space-y-0">
-                <span className="relative inline-block overflow-hidden rounded-full p-[1.5px]">
-                  <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]" />
-                  <div className="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-white dark:bg-gray-950 text-xs font-medium backdrop-blur-3xl">
-                    <a
-                      href={ctaHref}
-                      className="inline-flex rounded-full text-center group items-center w-full justify-center bg-gradient-to-tr from-zinc-300/20 via-purple-400/30 to-transparent dark:from-zinc-300/5 dark:via-purple-400/20 text-gray-900 dark:text-white border-input border-[1px] hover:bg-gradient-to-tr hover:from-zinc-300/30 hover:via-purple-400/40 hover:to-transparent dark:hover:from-zinc-300/10 dark:hover:via-purple-400/30 transition-all sm:w-auto py-4 px-10"
-                    >
-                      {ctaText}
-                    </a>
-                  </div>
-                </span>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6 w-full max-w-xl mx-auto">
+                <a
+                  href={ctaHref}
+                  className="inline-flex rounded-full text-center group items-center justify-center bg-gradient-to-tr from-zinc-300/20 via-purple-400/30 to-transparent dark:from-zinc-300/5 dark:via-purple-400/20 text-gray-900 dark:text-white border-input border-[1px] hover:bg-gradient-to-tr hover:from-zinc-300/30 hover:via-purple-400/40 hover:to-transparent dark:hover:from-zinc-300/10 dark:hover:via-purple-400/30 transition-all w-full sm:w-auto py-4 px-10 font-medium"
+                >
+                  {ctaText}
+                  <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-2" />
+                </a>
+                {secondaryCtaText && (
+                  <a
+                    href={secondaryCtaHref}
+                    className="inline-flex items-center justify-center rounded-full border-2 border-purple-500 text-purple-500 bg-transparent hover:bg-purple-600 hover:text-white transition-all duration-200 w-full sm:w-auto py-4 px-6 font-medium"
+                  >
+                    {secondaryCtaText}
+                  </a>
+                )}
               </div>
             </div>
             {bottomImage && (

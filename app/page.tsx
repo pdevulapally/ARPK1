@@ -64,6 +64,8 @@ export default function Home() {
           description="We create high-performance websites that drive results. From concept to launch, ARPK delivers exceptional web solutions tailored to your business needs."
           ctaText="Start Your Project"
           ctaHref="/request"
+          secondaryCtaText="Contact Us"
+          secondaryCtaHref="/contact"
           bottomImage={{
             light:
               "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/left-screen-dvpjBekyOBAr1EoMvRgjOTsrRZdTZC.png",

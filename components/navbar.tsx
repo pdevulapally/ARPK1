@@ -201,8 +201,17 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       <div
-        className={`md:hidden ${isOpen ? "block" : "hidden"} bg-black/90 backdrop-blur-lg border-b border-purple-500/20`}
+        className={`md:hidden ${isOpen ? "block" : "hidden"} fixed top-0 left-0 w-full h-screen bg-black/90 backdrop-blur-lg border-b border-purple-500/20 z-50`}
       >
+        <div className="flex justify-end p-4">
+          <button
+            onClick={() => setIsOpen(false)}
+            className="inline-flex items-center justify-center p-2 rounded-md text-gray-300 hover:text-white focus:outline-none"
+          >
+            <span className="sr-only">Close main menu</span>
+            <X className="block h-6 w-6" aria-hidden="true" />
+          </button>
+        </div>
         <div className="px-2 pt-2 pb-3 space-y-1">
           {navLinks.map((link) => (
             <Link
@@ -371,17 +380,33 @@ function AuthButtons() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-600 text-white">
-            {user.displayName ? user.displayName.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
-          </div>
+        <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
+          {user.photoURL ? (
+            <img
+              src={user.photoURL}
+              alt={user.displayName || user.email || "User"}
+              className="h-10 w-10 rounded-full object-cover"
+            />
+          ) : (
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-600 text-white">
+              {user.displayName ? user.displayName.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
+            </div>
+          )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <div className="flex items-center justify-start gap-2 p-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-600 text-white">
-            {user.displayName ? user.displayName.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
-          </div>
+          {user.photoURL ? (
+            <img
+              src={user.photoURL}
+              alt={user.displayName || user.email || "User"}
+              className="h-8 w-8 rounded-full object-cover"
+            />
+          ) : (
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-600 text-white">
+              {user.displayName ? user.displayName.charAt(0).toUpperCase() : user.email?.charAt(0).toUpperCase()}
+            </div>
+          )}
           <div className="flex flex-col space-y-0.5">
             <p className="text-sm font-medium">{user.displayName || user.email}</p>
             <p className="text-xs text-muted-foreground">{user.email}</p>

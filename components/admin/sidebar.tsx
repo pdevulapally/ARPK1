@@ -17,6 +17,7 @@ import {
   ChevronDown,
   User2,
   ChevronUp,
+  MessageCircle,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -46,6 +47,11 @@ export const menuItems = [
     title: "Projects",
     href: "/admin/projects",
     icon: FileText,
+  },
+  {
+    title: "Submissions",
+    href: "/admin/submissions",
+    icon: MessageCircle,
   },
   {
     title: "Analytics",

@@ -8,6 +8,22 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2, Mail, Send, Sparkles, MessageCircle, Zap, ArrowRight } from "lucide-react"
+import { createContactSubmission } from "@/lib/firebase-client"
+
+// Add a decorative SVG underline for the hero heading
+function AnimatedUnderline() {
+  return (
+    <svg height="12" width="180" className="mx-auto mt-2 md:mx-0 animate-pulse" aria-hidden="true">
+      <defs>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stopColor="#a78bfa" />
+          <stop offset="100%" stopColor="#818cf8" />
+        </linearGradient>
+      </defs>
+      <ellipse cx="90" cy="6" rx="85" ry="4" fill="url(#grad)" opacity="0.7" />
+    </svg>
+  )
+}
 
 export default function ContactPage() {
   const router = useRouter()
@@ -46,8 +62,7 @@ export default function ContactPage() {
     setLoading(true)
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      await createContactSubmission(formData)
       
       toast({
         title: "✨ Message Sent Successfully!",
@@ -77,13 +92,12 @@ export default function ContactPage() {
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-600/5 rounded-full blur-3xl animate-spin" style={{ animationDuration: '20s' }}></div>
       </div>
-
-      {/* Floating Particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
+      {/* Enhanced Animated Particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        {[...Array(30)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-purple-400/30 rounded-full animate-bounce"
+            className="absolute w-1.5 h-1.5 bg-gradient-to-br from-purple-400/40 to-blue-400/30 rounded-full animate-bounce"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -93,31 +107,30 @@ export default function ContactPage() {
           ></div>
         ))}
       </div>
-
       <div className="relative z-10 container mx-auto px-4 py-12 lg:py-20">
         {/* Hero Section */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-16 max-w-3xl mx-auto bg-white/5 backdrop-blur-xl rounded-3xl shadow-2xl py-10 px-4 md:px-12 border border-purple-400/10 hover:shadow-purple-400/10 transition-all duration-300">
           <div className="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 rounded-full px-4 py-2 mb-6">
             <Sparkles className="w-4 h-4 text-purple-400 animate-pulse" />
             <span className="text-sm font-medium text-purple-300">Get In Touch</span>
           </div>
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent mb-6 leading-tight">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold bg-gradient-to-r from-white via-purple-200 to-purple-400 bg-clip-text text-transparent mb-2 leading-tight">
             Let's Create Something
             <br />
             <span className="text-purple-400">Amazing Together</span>
           </h1>
-          <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
+          <AnimatedUnderline />
+          <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed mt-4">
             Ready to transform your ideas into reality? Drop us a message and let's start building your digital masterpiece.
           </p>
         </div>
-
         {/* Main Content */}
         <div className="grid lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {/* Contact Form */}
           <div className="lg:col-span-2">
             <Card 
               ref={cardRef}
-              className="relative border-0 bg-black/40 backdrop-blur-2xl shadow-2xl overflow-hidden group"
+              className="relative border-0 bg-white/10 backdrop-blur-2xl shadow-2xl overflow-hidden group hover:shadow-purple-400/20 hover:scale-[1.01] transition-all duration-300"
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
             >
@@ -125,16 +138,14 @@ export default function ContactPage() {
               <div 
                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
                 style={{
-                  background: `radial-gradient(600px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(147, 51, 234, 0.1), transparent 40%)`,
+                  background: `radial-gradient(600px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(147, 51, 234, 0.12), transparent 40%)`,
                 }}
               ></div>
-              
               {/* Border Animation */}
-              <div className="absolute inset-0 rounded-lg">
-                <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-purple-500/50 via-blue-500/50 to-purple-500/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm"></div>
-                <div className="absolute inset-[1px] rounded-lg bg-black/40 backdrop-blur-2xl"></div>
+              <div className="absolute inset-0 rounded-2xl pointer-events-none">
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-500/40 via-blue-500/40 to-purple-500/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm"></div>
+                <div className="absolute inset-[2px] rounded-2xl bg-black/40 backdrop-blur-2xl"></div>
               </div>
-
               <div className="relative z-10">
                 <CardHeader className="pb-8">
                   <div className="flex items-center gap-3 mb-4">
@@ -149,7 +160,6 @@ export default function ContactPage() {
                     </div>
                   </div>
                 </CardHeader>
-
                 <CardContent className="pt-0">
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid md:grid-cols-2 gap-6">
@@ -163,12 +173,11 @@ export default function ContactPage() {
                             placeholder="John Doe"
                             value={formData.name}
                             onChange={(e) => handleInputChange("name", e.target.value)}
-                            className="h-12 bg-white/5 border-gray-600/30 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-white placeholder:text-gray-500 transition-all duration-300 hover:bg-white/10"
+                            className="h-12 bg-white/10 border-gray-600/30 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-white placeholder:text-gray-500 transition-all duration-300 hover:bg-white/20 rounded-xl shadow focus:shadow-purple-400/10"
                           />
-                          <div className="absolute inset-0 rounded-md bg-gradient-to-r from-purple-500/20 to-blue-500/20 opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/20 to-blue-500/20 opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                         </div>
                       </div>
-
                       <div className="group">
                         <label className="block text-sm font-semibold text-gray-300 mb-3 transition-colors group-focus-within:text-purple-400">
                           Email Address *
@@ -180,13 +189,12 @@ export default function ContactPage() {
                             placeholder="john@example.com"
                             value={formData.email}
                             onChange={(e) => handleInputChange("email", e.target.value)}
-                            className="h-12 bg-white/5 border-gray-600/30 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-white placeholder:text-gray-500 transition-all duration-300 hover:bg-white/10"
+                            className="h-12 bg-white/10 border-gray-600/30 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-white placeholder:text-gray-500 transition-all duration-300 hover:bg-white/20 rounded-xl shadow focus:shadow-purple-400/10"
                           />
-                          <div className="absolute inset-0 rounded-md bg-gradient-to-r from-purple-500/20 to-blue-500/20 opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/20 to-blue-500/20 opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                         </div>
                       </div>
                     </div>
-
                     <div className="group">
                       <label className="block text-sm font-semibold text-gray-300 mb-3 transition-colors group-focus-within:text-purple-400">
                         Subject *
@@ -197,12 +205,11 @@ export default function ContactPage() {
                           placeholder="How can we help you?"
                           value={formData.subject}
                           onChange={(e) => handleInputChange("subject", e.target.value)}
-                          className="h-12 bg-white/5 border-gray-600/30 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-white placeholder:text-gray-500 transition-all duration-300 hover:bg-white/10"
+                          className="h-12 bg-white/10 border-gray-600/30 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-white placeholder:text-gray-500 transition-all duration-300 hover:bg-white/20 rounded-xl shadow focus:shadow-purple-400/10"
                         />
-                        <div className="absolute inset-0 rounded-md bg-gradient-to-r from-purple-500/20 to-blue-500/20 opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/20 to-blue-500/20 opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                       </div>
                     </div>
-
                     <div className="group">
                       <label className="block text-sm font-semibold text-gray-300 mb-3 transition-colors group-focus-within:text-purple-400">
                         Message *
@@ -213,16 +220,15 @@ export default function ContactPage() {
                           placeholder="Tell us about your project, goals, and how we can help bring your vision to life..."
                           value={formData.message}
                           onChange={(e) => handleInputChange("message", e.target.value)}
-                          className="min-h-[140px] bg-white/5 border-gray-600/30 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-white placeholder:text-gray-500 transition-all duration-300 hover:bg-white/10 resize-none"
+                          className="min-h-[140px] bg-white/10 border-gray-600/30 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-white placeholder:text-gray-500 transition-all duration-300 hover:bg-white/20 rounded-xl shadow focus:shadow-purple-400/10 resize-none"
                         />
-                        <div className="absolute inset-0 rounded-md bg-gradient-to-r from-purple-500/20 to-blue-500/20 opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/20 to-blue-500/20 opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                       </div>
                     </div>
-
                     <Button 
                       type="submit" 
                       disabled={loading}
-                      className="w-full h-14 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold text-lg rounded-xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl hover:shadow-purple-500/25 disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
+                      className="w-full h-14 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold text-lg rounded-2xl transition-all duration-300 transform hover:scale-[1.02] hover:shadow-2xl hover:shadow-purple-500/25 disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-blue-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                       <div className="relative flex items-center justify-center gap-3">
@@ -245,7 +251,6 @@ export default function ContactPage() {
               </div>
             </Card>
           </div>
-
           {/* Contact Info Sidebar */}
           <div className="space-y-6">
             {/* Email Card */}
@@ -270,9 +275,8 @@ export default function ContactPage() {
                 </div>
               </CardContent>
             </Card>
-
             {/* Quick Response Card */}
-            <Card className="border-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 backdrop-blur-2xl shadow-xl">
+            <Card className="border-0 bg-gradient-to-br from-purple-500/20 to-blue-500/20 backdrop-blur-2xl shadow-xl hover:scale-105 transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -287,9 +291,8 @@ export default function ContactPage() {
                 </div>
               </CardContent>
             </Card>
-
             {/* Availability Card */}
-            <Card className="border-0 bg-black/40 backdrop-blur-2xl shadow-xl">
+            <Card className="border-0 bg-black/40 backdrop-blur-2xl shadow-xl hover:scale-105 transition-all duration-300">
               <CardContent className="p-6">
                 <h3 className="font-bold text-white text-lg mb-4">We're Available</h3>
                 <div className="space-y-3">

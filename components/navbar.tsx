@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Menu, X, User, LogOut, Settings, Users, BarChart3 } from "lucide-react"
+import { Menu, X, User, LogOut, Settings, Users, BarChart3, Wrench } from "lucide-react"
 import { NoSSR } from "./no-ssr"
 
 export default function Navbar() {
@@ -166,6 +166,15 @@ export default function Navbar() {
                           </Link>
                         </DropdownMenuItem>
                       </>
+                    )}
+                    {/* Maintenance link for clients */}
+                    {!isAdmin && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/maintainance" className="cursor-pointer">
+                          <Wrench className="mr-2 h-4 w-4" />
+                          <span>Maintenance</span>
+                        </Link>
+                      </DropdownMenuItem>
                     )}
                     <DropdownMenuItem asChild>
                       <Link href="/profile" className="cursor-pointer">
@@ -440,6 +449,15 @@ function AuthButtons() {
               </Link>
             </DropdownMenuItem>
           </>
+        )}
+        {/* Maintenance link for clients */}
+        {!isAdmin && (
+          <DropdownMenuItem asChild>
+            <Link href="/maintainance" className="cursor-pointer">
+              <Wrench className="mr-2 h-4 w-4" />
+              <span>Maintenance</span>
+            </Link>
+          </DropdownMenuItem>
         )}
         <DropdownMenuItem asChild>
           <Link href="/profile" className="cursor-pointer">

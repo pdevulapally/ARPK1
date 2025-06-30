@@ -3,8 +3,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { getUserProjects } from "@/lib/firebase-client"
+import { getUserProjects, createMaintenanceSubmission } from "@/lib/firebase-client"
 import { useAuth } from "@/lib/auth"
+import { useToast } from "@/components/ui/use-toast"
 
 const COMPANY_SIZES = [
   "1-10", "11-50", "51-200", "201-1000", "1000+"
@@ -12,9 +13,11 @@ const COMPANY_SIZES = [
 
 export default function CustomMaintenanceForm({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) {
   const { user } = useAuth()
+  const { toast } = useToast()
   const [projects, setProjects] = useState<{ id: string, websiteType?: string, status?: string }[]>([])
   const [loadingProjects, setLoadingProjects] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -38,10 +41,40 @@ export default function CustomMaintenanceForm({ open, onOpenChange }: { open: bo
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSubmitted(true)
-    // TODO: Send to backend or email
+    setSubmitting(true)
+
+    try {
+      await createMaintenanceSubmission({
+        ...form,
+        userId: user?.uid,
+      })
+      
+      setSubmitted(true)
+      setForm({
+        name: "",
+        email: "",
+        company: "",
+        companySize: "",
+        referenceProject: "",
+        needs: "",
+        extra: "",
+      })
+      
+      toast({
+        title: "Request Submitted Successfully!",
+        description: "We'll contact you soon to discuss your maintenance needs.",
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit request. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -96,7 +129,13 @@ export default function CustomMaintenanceForm({ open, onOpenChange }: { open: bo
               <Textarea value={form.extra} onChange={e => handleChange("extra", e.target.value)} placeholder="Additional info (optional)" />
             </div>
             <DialogFooter>
-              <Button type="submit" className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold px-6 py-3 rounded-lg shadow-lg transition-all duration-200">Submit Request</Button>
+              <Button 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold px-6 py-3 rounded-lg shadow-lg transition-all duration-200"
+                disabled={submitting}
+              >
+                {submitting ? "Submitting..." : "Submit Request"}
+              </Button>
             </DialogFooter>
           </form>
         )}

@@ -582,3 +582,126 @@ export async function createUserSubscription(
     throw error
   }
 }
+
+// Contact form submissions
+export async function createContactSubmission(submissionData: {
+  name: string
+  email: string
+  subject: string
+  message: string
+}) {
+  try {
+    const database = getDb()
+    if (!database) throw new Error("Firestore not initialized")
+
+    // Dynamically import to avoid SSR issues
+    const { collection, addDoc, serverTimestamp } = await import("firebase/firestore")
+
+    const docRef = await addDoc(collection(database, "contactSubmissions"), {
+      ...submissionData,
+      status: "new",
+      createdAt: serverTimestamp(),
+    })
+    return docRef.id
+  } catch (error) {
+    console.error("Error creating contact submission:", error)
+    throw error
+  }
+}
+
+export async function getAllContactSubmissions() {
+  try {
+    const database = getDb()
+    if (!database) throw new Error("Firestore not initialized")
+
+    // Dynamically import to avoid SSR issues
+    const { collection, query, orderBy, getDocs } = await import("firebase/firestore")
+
+    const q = query(collection(database, "contactSubmissions"), orderBy("createdAt", "desc"))
+    const querySnapshot = await getDocs(q)
+    return querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as any[]
+  } catch (error) {
+    console.error("Error getting contact submissions:", error)
+    throw error
+  }
+}
+
+// Custom maintenance form submissions
+export async function createMaintenanceSubmission(submissionData: {
+  name: string
+  email: string
+  company?: string
+  companySize?: string
+  referenceProject?: string
+  needs: string
+  extra?: string
+  userId?: string
+}) {
+  try {
+    const database = getDb()
+    if (!database) throw new Error("Firestore not initialized")
+
+    // Dynamically import to avoid SSR issues
+    const { collection, addDoc, serverTimestamp } = await import("firebase/firestore")
+
+    const docRef = await addDoc(collection(database, "maintenanceSubmissions"), {
+      ...submissionData,
+      status: "new",
+      createdAt: serverTimestamp(),
+    })
+    return docRef.id
+  } catch (error) {
+    console.error("Error creating maintenance submission:", error)
+    throw error
+  }
+}
+
+export async function getAllMaintenanceSubmissions() {
+  try {
+    const database = getDb()
+    if (!database) throw new Error("Firestore not initialized")
+
+    // Dynamically import to avoid SSR issues
+    const { collection, query, orderBy, getDocs } = await import("firebase/firestore")
+
+    const q = query(collection(database, "maintenanceSubmissions"), orderBy("createdAt", "desc"))
+    const querySnapshot = await getDocs(q)
+    return querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as any[]
+  } catch (error) {
+    console.error("Error getting maintenance submissions:", error)
+    throw error
+  }
+}
+
+// Update submission status
+export async function updateSubmissionStatus(
+  collectionName: string,
+  submissionId: string,
+  status: string,
+  additionalData: Record<string, any> = {}
+) {
+  try {
+    const database = getDb()
+    if (!database) throw new Error("Firestore not initialized")
+
+    // Dynamically import to avoid SSR issues
+    const { doc, updateDoc, serverTimestamp } = await import("firebase/firestore")
+
+    const submissionRef = doc(database, collectionName, submissionId)
+    await updateDoc(submissionRef, {
+      status,
+      ...additionalData,
+      updatedAt: serverTimestamp(),
+    })
+    return true
+  } catch (error) {
+    console.error("Error updating submission status:", error)
+    throw error
+  }
+}

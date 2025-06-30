@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { useState } from "react"
 import { CheckCircle } from "lucide-react"
+import CustomMaintenanceForm from "@/components/CustomMaintenanceForm"
 
 const plans = [
   {
@@ -47,6 +48,7 @@ const plans = [
 export default function MaintenancePlansPage() {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [modalOpen, setModalOpen] = useState(false)
 
   const handleSubscribe = async (planKey: string) => {
     setLoadingPlan(planKey)
@@ -169,14 +171,15 @@ export default function MaintenancePlansPage() {
         ))}
       </div>
       {/* Contact Us Button */}
-      <div className="w-full flex justify-center mt-12">
-        <a
-          href="/contact"
-          className="inline-block bg-gradient-to-r from-pink-500 to-purple-600 hover:from-purple-600 hover:to-pink-500 text-white font-bold px-8 py-4 rounded-xl shadow-xl text-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-offset-2 focus:ring-offset-black"
+      <div className="flex justify-center mt-10">
+        <button
+          className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold px-8 py-4 rounded-lg shadow-lg transition-all duration-200 text-lg"
+          onClick={() => setModalOpen(true)}
         >
           Contact Us for Custom Maintenance
-        </a>
+        </button>
       </div>
+      <CustomMaintenanceForm open={modalOpen} onOpenChange={setModalOpen} />
     </div>
   )
 } 

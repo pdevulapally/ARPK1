@@ -724,8 +724,8 @@ export default function PremiumNHSFClaimPage() {
               </h3>
               <div className="space-y-3">
                 {[
-                  { label: "Email", value: "info@arpk.co.uk", icon: Mail },
-                  { label: "Phone", value: "+44 123 456 7890", icon: Phone },
+                  { label: "Email", value: "arpkwebsitedevelopment@gmail.com", icon: Mail },
+                  { label: "Phone", value: "+44 7493412454", icon: Phone },
                   { label: "Location", value: "United Kingdom", icon: MapPin }
                 ].map((contact, index) => (
                   <motion.div

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button"
 import { CheckCircle, ArrowRight } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
-import { handlePaymentSuccess } from "@/app/actions/payment"
+// import { handlePaymentSuccess } from "@/app/actions/payment"
 
 // Success content component that uses useSearchParams
 function SuccessPageContent() {
@@ -24,7 +24,7 @@ function SuccessPageContent() {
       }
 
       try {
-        await handlePaymentSuccess(sessionId)
+        // Payment status is confirmed via Stripe webhook. Optionally, we could verify session details here.
         toast({
           title: "Payment Successful",
           description: "Your payment has been processed successfully.",

@@ -24,9 +24,7 @@ export const getStripeServer = () => {
       throw new Error("Stripe secret key is not set")
     }
 
-    stripeInstance = new Stripe(stripeSecretKey, {
-      apiVersion: "2025-03-31.basil",
-    })
+    stripeInstance = new Stripe(stripeSecretKey)
   }
 
   return stripeInstance

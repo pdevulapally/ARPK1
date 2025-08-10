@@ -1,16 +1,33 @@
 import { NextResponse } from "next/server"
 import { getStripeServer } from "@/lib/stripe"
 
+import { headers } from "next/headers"
+import { RateLimiter } from "@/lib/rate-limit"
+import { getClientIpFromHeaders, isBlockedUserAgent } from "@/lib/security"
+
 export async function POST(request: Request) {
   try {
-    const { projectId, customerId, amount, description } = await request.json()
+    const { projectId, customerId, amount, description, captchaToken } = await request.json()
+
+    const hdrs = headers()
+    const ip = getClientIpFromHeaders(hdrs as unknown as Headers) || "unknown"
+    const ua = hdrs.get("user-agent") || ""
+    if (isBlockedUserAgent(ua)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    }
+
+    const limiter = new RateLimiter({ windowSeconds: 60, maxRequests: 5, prefix: "invoice" })
+    const rl = await limiter.check(ip)
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 })
+    }
     
     const stripe = getStripeServer()
     
     // Create an invoice item
-    const invoiceItem = await stripe.invoiceItems.create({
+    await stripe.invoiceItems.create({
       customer: customerId,
-      amount: amount * 100, // Convert to cents
+      amount: Math.floor(amount * 100),
       currency: 'usd',
       description: description,
     })
@@ -18,21 +35,16 @@ export async function POST(request: Request) {
     // Create and finalize the invoice
     const invoice = await stripe.invoices.create({
       customer: customerId,
-      auto_advance: true, // Auto-finalize the invoice
+      auto_advance: true,
       collection_method: 'send_invoice',
       metadata: {
         projectId: projectId
       }
     })
 
-    // Send the invoice only if it has an ID and is finalized
     if (invoice.id) {
-      // Finalize the invoice first
       const finalizedInvoice = await stripe.invoices.finalizeInvoice(invoice.id)
-      
-      // Then send it
       await stripe.invoices.sendInvoice(invoice.id)
-      
       return NextResponse.json({ 
         success: true, 
         invoiceUrl: finalizedInvoice.hosted_invoice_url,

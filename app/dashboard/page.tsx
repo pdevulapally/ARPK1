@@ -14,7 +14,7 @@ import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useToast } from "@/components/ui/use-toast"
 import { handlePaymentSuccess } from "@/app/actions/payment"
-import { PaymentButton } from "@/components/payment-button"
+
 import { motion } from "framer-motion"
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar"
 import "react-circular-progressbar/dist/styles.css"
@@ -382,28 +382,6 @@ export default function DashboardPage() {
                               >
                                 <Link href={`/dashboard/projects/${project.id}`}>View Details</Link>
                               </Button>
-
-                              {!project.depositPaid && (
-                                <PaymentButton
-                                  projectId={project.id}
-                                  amount={Number.parseFloat(project.budget) * 0.5}
-                                  userEmail={project.userEmail}
-                                  paymentType="deposit"
-                                  label="Pay Deposit"
-                                  className="bg-purple-600 hover:bg-purple-700 size-sm"
-                                />
-                              )}
-
-                              {project.depositPaid && !project.finalPaid && project.status === "completed" && (
-                                <PaymentButton
-                                  projectId={project.id}
-                                  amount={Number.parseFloat(project.budget) * 0.5}
-                                  userEmail={project.userEmail}
-                                  paymentType="final"
-                                  label="Pay Final Amount"
-                                  className="bg-green-600 hover:bg-green-700 size-sm"
-                                />
-                              )}
                             </div>
                           </div>
                         </CardContent>

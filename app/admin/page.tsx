@@ -18,7 +18,7 @@ import {
   type Project,
 } from "@/lib/firebase"
 import { formatDistanceToNow } from "date-fns"
-import { Clock, CheckCircle, AlertCircle, PauseCircle, Loader2, DollarSign, X } from "lucide-react"
+import { Clock, CheckCircle, AlertCircle, PauseCircle, Loader2, DollarSign, X, Star, ShoppingCart, BookOpen, Building, Zap, Globe } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -40,6 +40,23 @@ const statusColors = {
   "client review": "bg-orange-500/20 text-orange-500 border-orange-500/50",
   "final review": "bg-indigo-500/20 text-indigo-500 border-indigo-500/50",
   completed: "bg-green-500/20 text-green-500 border-green-500/50",
+}
+
+const websiteTypeIcons = {
+  portfolio: <Star className="h-4 w-4" />,
+  ecommerce: <ShoppingCart className="h-4 w-4" />,
+  blog: <BookOpen className="h-4 w-4" />,
+  business: <Building className="h-4 w-4" />,
+  landing: <Zap className="h-4 w-4" />,
+  "web-app": <Globe className="h-4 w-4" />,
+  other: <Globe className="h-4 w-4" />,
+}
+
+const budgetRangeMap = {
+  "500-1000": "£500 - £1,000",
+  "1000-2500": "£1,000 - £2,500", 
+  "2500-5000": "£2,500 - £5,000",
+  "5000+": "£5,000+"
 }
 
 export default function AdminDashboardPage() {
@@ -84,7 +101,11 @@ export default function AdminDashboardPage() {
 
   const handleApproveClick = (request: Request) => {
     setSelectedRequest(request)
-    setQuotedBudget(request.budget)
+    // Use budgetRange if available, otherwise fall back to budget
+    const budgetValue = (request as any).budgetRange ? 
+      budgetRangeMap[(request as any).budgetRange as keyof typeof budgetRangeMap] || (request as any).budgetRange :
+      request.budget
+    setQuotedBudget(budgetValue)
     setApproveDialogOpen(true)
   }
 
@@ -104,13 +125,8 @@ export default function AdminDashboardPage() {
     if (!selectedRequest) return
 
     try {
-      // Update request status
-      await updateRequestStatus(selectedRequest.id, "approved", {
-        quotedBudget: quotedBudget,
-      })
-
-      // Create a new project
-      const projectData = {
+      // Create project data with required fields
+      const projectData: any = {
         requestId: selectedRequest.id,
         userId: selectedRequest.userId,
         userEmail: selectedRequest.userEmail,
@@ -118,37 +134,47 @@ export default function AdminDashboardPage() {
         features: selectedRequest.features,
         deadline: selectedRequest.deadline,
         budget: quotedBudget,
-        status: "in progress",
+        status: "approved",
+      };
+
+      // Only add optional fields if they have values
+      if (selectedRequest.designPreferences && selectedRequest.designPreferences.trim()) {
+        projectData.designPreferences = selectedRequest.designPreferences;
+      }
+      
+      if (selectedRequest.additionalNotes && selectedRequest.additionalNotes.trim()) {
+        projectData.additionalNotes = selectedRequest.additionalNotes;
+      }
+      
+      if ((selectedRequest as any).otherWebsiteType && (selectedRequest as any).otherWebsiteType.trim()) {
+        projectData.otherWebsiteType = (selectedRequest as any).otherWebsiteType;
       }
 
-      const projectId = await createProject(projectData)
+      // Create project with the quoted budget
+      await createProject(projectData)
+
+      // Update request status
+      await updateRequestStatus(selectedRequest.id, "approved")
 
       // Update local state
-      setRequests((prev) =>
-        prev.map((req) => (req.id === selectedRequest.id ? { ...req, status: "approved", quotedBudget } : req)),
-      )
+      setRequests(requests.map(req => 
+        req.id === selectedRequest.id ? { ...req, status: "approved" } : req
+      ))
 
-      // Add the new project to the projects list
-      const newProject = {
-        id: projectId,
-        ...projectData,
-        createdAt: new Date().toISOString(),
-      } as Project
-
-      setProjects((prev) => [newProject, ...prev])
+      setApproveDialogOpen(false)
+      setSelectedRequest(null)
+      setQuotedBudget("")
 
       toast({
         title: "Request Approved",
-        description: "The request has been approved and a new project has been created.",
+        description: "Project created and client notified.",
       })
     } catch (error: any) {
       toast({
         title: "Error",
-        description: `Failed to approve request: ${error.message}`,
+        description: "Failed to approve request. Please try again.",
         variant: "destructive",
       })
-    } finally {
-      setApproveDialogOpen(false)
     }
   }
 
@@ -156,28 +182,27 @@ export default function AdminDashboardPage() {
     if (!selectedRequest) return
 
     try {
-      await updateRequestStatus(selectedRequest.id, "rejected", {
-        rejectionReason: rejectReason,
-      })
+      await updateRequestStatus(selectedRequest.id, "rejected", rejectReason)
 
-      setRequests((prev) =>
-        prev.map((req) =>
-          req.id === selectedRequest.id ? { ...req, status: "rejected", rejectionReason: rejectReason } : req,
-        ),
-      )
+      // Update local state
+      setRequests(requests.map(req => 
+        req.id === selectedRequest.id ? { ...req, status: "rejected", rejectionReason: rejectReason } : req
+      ))
+
+      setRejectDialogOpen(false)
+      setSelectedRequest(null)
+      setRejectReason("")
 
       toast({
         title: "Request Rejected",
-        description: "The request has been rejected.",
+        description: "Client has been notified.",
       })
     } catch (error: any) {
       toast({
         title: "Error",
-        description: `Failed to reject request: ${error.message}`,
+        description: "Failed to reject request. Please try again.",
         variant: "destructive",
       })
-    } finally {
-      setRejectDialogOpen(false)
     }
   }
 
@@ -185,28 +210,27 @@ export default function AdminDashboardPage() {
     if (!selectedRequest) return
 
     try {
-      await updateRequestStatus(selectedRequest.id, "on hold", {
-        holdReason: holdReason,
-      })
+      await updateRequestStatus(selectedRequest.id, "on hold", holdReason)
 
-      setRequests((prev) =>
-        prev.map((req) =>
-          req.id === selectedRequest.id ? { ...req, status: "on hold", holdReason: holdReason } : req,
-        ),
-      )
+      // Update local state
+      setRequests(requests.map(req => 
+        req.id === selectedRequest.id ? { ...req, status: "on hold", holdReason: holdReason } : req
+      ))
+
+      setHoldDialogOpen(false)
+      setSelectedRequest(null)
+      setHoldReason("")
 
       toast({
         title: "Request On Hold",
-        description: "The request has been put on hold.",
+        description: "Client has been notified.",
       })
     } catch (error: any) {
       toast({
         title: "Error",
-        description: `Failed to put request on hold: ${error.message}`,
+        description: "Failed to put request on hold. Please try again.",
         variant: "destructive",
       })
-    } finally {
-      setHoldDialogOpen(false)
     }
   }
 
@@ -214,18 +238,19 @@ export default function AdminDashboardPage() {
     try {
       await updateProjectStatus(projectId, newStatus)
 
-      setProjects((prev) =>
-        prev.map((project) => (project.id === projectId ? { ...project, status: newStatus } : project)),
-      )
+      // Update local state
+      setProjects(projects.map(project => 
+        project.id === projectId ? { ...project, status: newStatus } : project
+      ))
 
       toast({
-        title: "Project Updated",
-        description: `Project status updated to ${newStatus}.`,
+        title: "Status Updated",
+        description: `Project moved to ${newStatus.replace("-", " ")}.`,
       })
     } catch (error: any) {
       toast({
         title: "Error",
-        description: `Failed to update project: ${error.message}`,
+        description: "Failed to update project status. Please try again.",
         variant: "destructive",
       })
     }
@@ -244,6 +269,36 @@ export default function AdminDashboardPage() {
       default:
         return <Clock className="h-4 w-4" />
     }
+  }
+
+  const getWebsiteTypeDisplay = (request: Request) => {
+    const websiteType = request.websiteType
+    const icon = websiteTypeIcons[websiteType as keyof typeof websiteTypeIcons] || websiteTypeIcons.other
+    
+    if (websiteType === "other" && (request as any).otherWebsiteType) {
+      return (
+        <div className="flex items-center gap-2">
+          {icon}
+          <span>Custom: {(request as any).otherWebsiteType}</span>
+        </div>
+      )
+    }
+    
+    return (
+      <div className="flex items-center gap-2">
+        {icon}
+        <span className="capitalize">{websiteType} Website</span>
+      </div>
+    )
+  }
+
+  const getBudgetDisplay = (request: Request) => {
+    // Handle new budgetRange format
+    if ((request as any).budgetRange) {
+      return budgetRangeMap[(request as any).budgetRange as keyof typeof budgetRangeMap] || (request as any).budgetRange
+    }
+    // Fall back to old budget format
+    return request.budget
   }
 
   if (loading) {
@@ -302,7 +357,9 @@ export default function AdminDashboardPage() {
                         <CardContent className="p-6">
                           <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
                             <div>
-                              <h3 className="text-lg font-semibold capitalize">{request.websiteType} Website</h3>
+                              <h3 className="text-lg font-semibold">
+                                {getWebsiteTypeDisplay(request)}
+                              </h3>
                               <p className="text-sm text-muted-foreground">From: {request.userEmail}</p>
                               <p className="text-sm text-muted-foreground">
                                 Submitted{" "}
@@ -326,8 +383,8 @@ export default function AdminDashboardPage() {
 
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
-                              <p className="text-sm font-medium">Budget</p>
-                              <p className="text-sm">${request.budget}</p>
+                              <p className="text-sm font-medium">Budget Range</p>
+                              <p className="text-sm">{getBudgetDisplay(request)}</p>
                             </div>
                             <div>
                               <p className="text-sm font-medium">Deadline</p>
@@ -350,6 +407,13 @@ export default function AdminDashboardPage() {
                             <div className="mb-4">
                               <p className="text-sm font-medium mb-1">Design Preferences</p>
                               <p className="text-sm text-muted-foreground">{request.designPreferences}</p>
+                            </div>
+                          )}
+
+                          {(request as any).additionalNotes && (
+                            <div className="mb-4">
+                              <p className="text-sm font-medium mb-1">Additional Notes</p>
+                              <p className="text-sm text-muted-foreground">{(request as any).additionalNotes}</p>
                             </div>
                           )}
 
@@ -431,7 +495,7 @@ export default function AdminDashboardPage() {
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
                               <p className="text-sm font-medium">Budget</p>
-                              <p className="text-sm">${project.budget}</p>
+                              <p className="text-sm">{project.budget}</p>
                             </div>
                             <div>
                               <p className="text-sm font-medium">Deadline</p>
@@ -510,18 +574,21 @@ export default function AdminDashboardPage() {
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="budget">Budget (USD)</Label>
+                <Label htmlFor="budget">Budget (GBP)</Label>
                 <div className="flex items-center">
                   <DollarSign className="h-4 w-4 mr-2 text-muted-foreground" />
                   <Input
                     id="budget"
-                    type="number"
+                    type="text"
                     value={quotedBudget}
                     onChange={(e) => setQuotedBudget(e.target.value)}
                     className="bg-black/50 border-purple-500/30 focus:border-purple-500"
+                    placeholder="e.g., £1,500"
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">Client's proposed budget: ${selectedRequest?.budget}</p>
+                <p className="text-xs text-muted-foreground">
+                  Client's proposed budget: {selectedRequest ? getBudgetDisplay(selectedRequest) : ''}
+                </p>
               </div>
             </div>
             <DialogFooter>

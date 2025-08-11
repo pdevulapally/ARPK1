@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { doc, getDoc, getFirestore } from "firebase/firestore"
+import { doc, getDoc, getFirestore, collection, query, where, getDocs } from "firebase/firestore"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -17,14 +17,15 @@ import { InvoiceButton } from "@/components/invoice-button"
 import { DiscountCodeForm } from "@/components/discount-code-form"
 import { PaymentReminderCard } from "@/components/payment-reminder"
 
+
 interface ProjectDetails {
   id: string
   userId: string
   userEmail: string
   websiteType: string
   features: string[]
-  deadline: string
-  budget: string
+  deadline: any
+  budget: string | number
   status: string
   createdAt: any
   designPreferences?: string
@@ -32,6 +33,7 @@ interface ProjectDetails {
   paymentStatus?: string
   depositPaid?: boolean
   finalPaid?: boolean
+  quotedBudget?: string | number
 }
 
 const statusColors = {
@@ -45,22 +47,7 @@ const statusColors = {
   completed: "bg-green-500/20 text-green-500 border-green-500/50",
 }
 
-// Move this outside the component to avoid recreation on each render
-const createSampleReminder = (project: ProjectDetails | null) => {
-  if (!project) return null
 
-  return {
-    id: "sample-reminder",
-    projectId: project.id,
-    userId: project.userId,
-    userEmail: project.userEmail,
-    paymentType: "deposit",
-    amount: Number.parseFloat(project.budget) * 0.5,
-    dueDate: new Date(new Date().setDate(new Date().getDate() + 7)).toISOString(),
-    status: "pending",
-    createdAt: new Date().toISOString(),
-  }
-}
 
 const ProjectDetailsPage = () => {
   const params = useParams()
@@ -70,6 +57,7 @@ const ProjectDetailsPage = () => {
   const [project, setProject] = useState<ProjectDetails | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [paymentReminders, setPaymentReminders] = useState<any[]>([])
   const db = getFirestore()
 
   useEffect(() => {
@@ -96,6 +84,23 @@ const ProjectDetailsPage = () => {
         }
 
         setProject(projectData)
+
+        // Fetch payment reminders for this project
+        try {
+          const remindersQuery = query(
+            collection(db, "paymentReminders"),
+            where("projectId", "==", projectId)
+          )
+          const remindersSnapshot = await getDocs(remindersQuery)
+          const reminders = remindersSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }))
+          setPaymentReminders(reminders)
+        } catch (reminderError) {
+          console.error("Error fetching payment reminders:", reminderError)
+          // Don't fail the whole page if reminders fail to load
+        }
       } catch (error: any) {
         console.error("Error fetching project:", error)
         setError(error.message || "Failed to load project")
@@ -159,6 +164,10 @@ const ProjectDetailsPage = () => {
   // Ensure features is always an array
   const features = Array.isArray(project.features) ? project.features : []
 
+  // Get budget from project data
+  const budgetValue = typeof project.budget === 'number' ? project.budget : 
+                     typeof project.budget === 'string' ? parseFloat(project.budget) || 0 : 0
+
   return (
     <AuthGuard>
       <div className="container mx-auto px-4 py-24">
@@ -198,11 +207,19 @@ const ProjectDetailsPage = () => {
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-gray-400 mb-1">Budget</h3>
-                    <p className="text-lg font-medium">£{project.budget}</p>
+                    <p className="text-lg font-medium">£{budgetValue}</p>
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-gray-400 mb-1">Deadline</h3>
-                    <p className="text-lg font-medium">{new Date(project.deadline).toLocaleDateString()}</p>
+                    <p className="text-lg font-medium">
+                      {project.deadline ? 
+                        (typeof project.deadline === 'object' && project.deadline && 'toDate' in project.deadline ? 
+                          (project.deadline as any).toDate().toLocaleDateString() : 
+                          new Date(project.deadline).toLocaleDateString()
+                        ) : 
+                        'Not set'
+                      }
+                    </p>
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-gray-400 mb-1">Payment Status</h3>
@@ -312,7 +329,15 @@ const ProjectDetailsPage = () => {
                       </div>
                       <div>
                         <p className="font-medium">Deadline</p>
-                        <p className="text-sm text-gray-400">{new Date(project.deadline).toLocaleString()}</p>
+                        <p className="text-sm text-gray-400">
+                          {project.deadline ? 
+                            (typeof project.deadline === 'object' && project.deadline && 'toDate' in project.deadline ? 
+                              (project.deadline as any).toDate().toLocaleString() : 
+                              new Date(project.deadline).toLocaleString()
+                            ) : 
+                            'Not set'
+                          }
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -343,7 +368,7 @@ const ProjectDetailsPage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <h3 className="text-sm font-medium text-gray-400 mb-1">Total Budget</h3>
-                        <p className="text-2xl font-medium">£{project.budget}</p>
+                        <p className="text-2xl font-medium">£{budgetValue}</p>
                       </div>
                       <div>
                         <h3 className="text-sm font-medium text-gray-400 mb-1">Payment Status</h3>
@@ -363,7 +388,7 @@ const ProjectDetailsPage = () => {
                       <div className="flex justify-between items-center">
                         <div>
                           <h3 className="font-medium">Deposit (50%)</h3>
-                          <p className="text-sm text-gray-400">£{Number.parseFloat(project.budget) * 0.5}</p>
+                          <p className="text-sm text-gray-400">£{(budgetValue * 0.5).toFixed(2)}</p>
                         </div>
                         <div className="flex items-center gap-3">
                           <Badge
@@ -376,7 +401,7 @@ const ProjectDetailsPage = () => {
                           {!project.depositPaid ? (
                             <PaymentButton
                               projectId={project.id}
-                              amount={Number.parseFloat(project.budget) * 0.5}
+                              amount={budgetValue * 0.5}
                               userEmail={project.userEmail}
                               paymentType="deposit"
                               label="Pay Deposit"
@@ -387,11 +412,10 @@ const ProjectDetailsPage = () => {
                               project={{
                                 ...project,
                                 requestId: project.id,
-                                customerId: project.userId,
-                                depositAmount: Number.parseFloat(project.budget) * 0.5,
-                                finalAmount: Number.parseFloat(project.budget) * 0.5,
+                                depositAmount: budgetValue * 0.5,
+                                finalAmount: budgetValue * 0.5,
                                 title: `${project.websiteType} Website Project`
-                              }}
+                              } as any}
                               invoiceType="deposit"
                               className="border-green-500/30 text-green-500 hover:bg-green-900/20"
                             />
@@ -402,7 +426,7 @@ const ProjectDetailsPage = () => {
                       <div className="flex justify-between items-center">
                         <div>
                           <h3 className="font-medium">Final Payment (50%)</h3>
-                          <p className="text-sm text-gray-400">£{Number.parseFloat(project.budget) * 0.5}</p>
+                          <p className="text-sm text-gray-400">£{(budgetValue * 0.5).toFixed(2)}</p>
                         </div>
                         <div className="flex items-center gap-3">
                           <Badge
@@ -415,7 +439,7 @@ const ProjectDetailsPage = () => {
                           {project.depositPaid && !project.finalPaid && project.status === "completed" ? (
                             <PaymentButton
                               projectId={project.id}
-                              amount={Number.parseFloat(project.budget) * 0.5}
+                              amount={budgetValue * 0.5}
                               userEmail={project.userEmail}
                               paymentType="final"
                               label="Pay Final Amount"
@@ -426,12 +450,11 @@ const ProjectDetailsPage = () => {
                               <InvoiceButton
                                 project={{
                                   ...project,
-                                  requestId: project.id, // Using id as requestId
-                                  customerId: project.userId, // Using userId as customerId
-                                  depositAmount: Number.parseFloat(project.budget) * 0.5,
-                                  finalAmount: Number.parseFloat(project.budget) * 0.5,
-                                  title: `${project.websiteType} Website Project` // Generating title from websiteType
-                                }}
+                                  requestId: project.id,
+                                  depositAmount: budgetValue * 0.5,
+                                  finalAmount: budgetValue * 0.5,
+                                  title: `${project.websiteType} Website Project`
+                                } as any}
                                 invoiceType="final"
                                 className="border-green-500/30 text-green-500 hover:bg-green-900/20"
                               />
@@ -444,15 +467,18 @@ const ProjectDetailsPage = () => {
                     <Separator className="bg-purple-500/20" />
 
                     {/* Add discount code form */}
-                    <DiscountCodeForm
-                      onApplyDiscount={(discount) => {
-                        toast({
-                          title: "Discount Applied",
-                         description: `${discount.percentage}% discount has been applied to your order.`,
+                    <div className="mt-8">
+                      <DiscountCodeForm
+                        userEmail={project.userEmail}
+                        onApplyDiscount={(discount) => {
+                          toast({
+                            title: "Discount Applied",
+                           description: `${discount.percentage}% discount has been applied to your order.`,
 
-                        })
-                      }}
-                    />
+                          })
+                        }}
+                      />
+                    </div>
 
                     <div>
                       <h3 className="text-sm font-medium text-gray-400 mb-2">Payment Policy</h3>
@@ -475,11 +501,20 @@ const ProjectDetailsPage = () => {
                     <CardDescription>Upcoming and past payment reminders</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <PaymentReminderCard
-                      reminder={createSampleReminder(project)}
-                      projectId={project.id}
-                      userEmail={project.userEmail}
-                    />
+                    {paymentReminders.length > 0 ? (
+                      paymentReminders.map((reminder) => (
+                        <PaymentReminderCard
+                          key={reminder.id}
+                          reminder={reminder}
+                          projectId={project.id}
+                          userEmail={project.userEmail}
+                        />
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <p className="text-muted-foreground">No payment reminders found</p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </>

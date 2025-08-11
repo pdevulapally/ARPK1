@@ -24,6 +24,7 @@ export const getStripeServer = () => {
       throw new Error("Stripe secret key is not set")
     }
 
+    // Use a modern API version that supports payment_method_options and automatic_payment_methods
     stripeInstance = new Stripe(stripeSecretKey, {
       apiVersion: "2025-03-31.basil",
     })

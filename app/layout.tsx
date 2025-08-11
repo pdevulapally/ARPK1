@@ -36,19 +36,4 @@ export default function RootLayout({
   )
 }
 
-export async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = await cookies()
-  const defaultOpen = (await cookieStore).get("sidebar_state")?.value === "true"
 
-  return (
-    <AdminSidebar>
-      {children}
-    </AdminSidebar>
-  )
-}
-
-import { AdminSidebar } from "@/components/admin/sidebar"
-
-function cookies() {
-  throw new Error("Function not implemented.")
-}

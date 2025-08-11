@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion"
 import { useInView } from "react-intersection-observer"
-import { History, Target, Award, Code, Zap, Shield, Lightbulb, Rocket, Heart, Star, Layers } from "lucide-react"
+import { History, Target, Award, Code, Zap, Shield, Lightbulb, Rocket, Heart, Star, Layers, Users, Globe, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
@@ -11,6 +11,7 @@ export default function AboutPage() {
   const { ref: valuesRef, inView: valuesInView } = useInView({ triggerOnce: true, threshold: 0.1 })
   const { ref: storyRef, inView: storyInView } = useInView({ triggerOnce: true, threshold: 0.1 })
   const { ref: ctaRef, inView: ctaInView } = useInView({ triggerOnce: true, threshold: 0.1 })
+  const { ref: statsRef, inView: statsInView } = useInView({ triggerOnce: true, threshold: 0.1 })
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -42,6 +43,13 @@ export default function AboutPage() {
       },
     },
   }
+
+  const statsData = [
+    { number: "50+", label: "Projects Completed", icon: <CheckCircle className="h-6 w-6" /> },
+    { number: "100%", label: "Client Satisfaction", icon: <Heart className="h-6 w-6" /> },
+    { number: "24/7", label: "Support Available", icon: <Shield className="h-6 w-6" /> },
+    { number: "2+", label: "Years Experience", icon: <Award className="h-6 w-6" /> },
+  ]
 
   return (
     <div className="min-h-screen bg-black">
@@ -115,7 +123,7 @@ export default function AboutPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.9, duration: 0.5 }}
-                className="bg-purple-900/40 backdrop-blur-md px-5 py-2 rounded-full border border-purple-700/30"
+                className="bg-purple-900/40 backdrop-blur-md px-5 py-2 rounded-full border border-purple-700/30 hover:bg-purple-800/50 transition-all duration-300"
               >
                 <span className="text-purple-300 flex items-center gap-2">
                   <Star className="h-4 w-4" /> Award-winning
@@ -126,7 +134,7 @@ export default function AboutPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.1, duration: 0.5 }}
-                className="bg-purple-900/40 backdrop-blur-md px-5 py-2 rounded-full border border-purple-700/30"
+                className="bg-purple-900/40 backdrop-blur-md px-5 py-2 rounded-full border border-purple-700/30 hover:bg-purple-800/50 transition-all duration-300"
               >
                 <span className="text-purple-300 flex items-center gap-2">
                   <Layers className="h-4 w-4" /> Modern Technologies
@@ -137,13 +145,46 @@ export default function AboutPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1.3, duration: 0.5 }}
-                className="bg-purple-900/40 backdrop-blur-md px-5 py-2 rounded-full border border-purple-700/30"
+                className="bg-purple-900/40 backdrop-blur-md px-5 py-2 rounded-full border border-purple-700/30 hover:bg-purple-800/50 transition-all duration-300"
               >
                 <span className="text-purple-300 flex items-center gap-2">
                   <Shield className="h-4 w-4" /> Secure By Design
                 </span>
               </motion.div>
             </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* New Stats Section */}
+      <section className="py-16 bg-gray-950 relative">
+        <div className="container mx-auto px-4">
+          <motion.div
+            ref={statsRef}
+            variants={containerVariants}
+            initial="hidden"
+            animate={statsInView ? "visible" : "hidden"}
+            className="grid grid-cols-2 md:grid-cols-4 gap-8"
+          >
+            {statsData.map((stat, index) => (
+              <motion.div
+                key={index}
+                variants={itemVariants}
+                className="text-center group"
+              >
+                <div className="bg-gradient-to-br from-purple-900/30 to-purple-800/20 p-6 rounded-xl border border-purple-700/30 hover:border-purple-600/50 transition-all duration-300 hover:shadow-lg hover:shadow-purple-900/20">
+                  <div className="text-purple-400 mb-4 flex justify-center group-hover:scale-110 transition-transform duration-300">
+                    {stat.icon}
+                  </div>
+                  <div className="text-3xl md:text-4xl font-bold text-white mb-2">
+                    {stat.number}
+                  </div>
+                  <div className="text-gray-400 text-sm font-medium">
+                    {stat.label}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </motion.div>
         </div>
       </section>
@@ -186,6 +227,31 @@ export default function AboutPage() {
                   Today, we're proud to have helped dozens of clients establish their online presence and achieve their
                   business goals through custom web solutions.
                 </p>
+              </div>
+
+              {/* Added timeline */}
+              <div className="mt-8 space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                  <div>
+                    <div className="text-purple-300 font-semibold">2022</div>
+                    <div className="text-gray-400 text-sm">Company Founded</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                  <div>
+                    <div className="text-purple-300 font-semibold">2023</div>
+                    <div className="text-gray-400 text-sm">First 25 Projects Completed</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                  <div>
+                    <div className="text-purple-300 font-semibold">2024</div>
+                    <div className="text-gray-400 text-sm">Expanding Services & Team</div>
+                  </div>
+                </div>
               </div>
             </motion.div>
             
@@ -246,9 +312,9 @@ export default function AboutPage() {
           <div className="grid md:grid-cols-2 gap-8">
             <motion.div 
               variants={itemVariants} 
-              className="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-xl border border-gray-700 hover:border-purple-700/50 transition-all duration-300 hover:shadow-lg hover:shadow-purple-900/20"
+              className="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-xl border border-gray-700 hover:border-purple-700/50 transition-all duration-300 hover:shadow-lg hover:shadow-purple-900/20 group"
             >
-              <div className="w-16 h-16 bg-purple-900/50 rounded-lg flex items-center justify-center mb-6 border border-purple-700/30">
+              <div className="w-16 h-16 bg-purple-900/50 rounded-lg flex items-center justify-center mb-6 border border-purple-700/30 group-hover:bg-purple-800/50 transition-colors duration-300">
                 <Target className="h-8 w-8 text-purple-400" />
               </div>
               <h3 className="text-2xl font-bold mb-4 text-white">Our Mission</h3>
@@ -283,9 +349,9 @@ export default function AboutPage() {
 
             <motion.div 
               variants={itemVariants} 
-              className="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-xl border border-gray-700 hover:border-purple-700/50 transition-all duration-300 hover:shadow-lg hover:shadow-purple-900/20"
+              className="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-xl border border-gray-700 hover:border-purple-700/50 transition-all duration-300 hover:shadow-lg hover:shadow-purple-900/20 group"
             >
-              <div className="w-16 h-16 bg-purple-900/50 rounded-lg flex items-center justify-center mb-6 border border-purple-700/30">
+              <div className="w-16 h-16 bg-purple-900/50 rounded-lg flex items-center justify-center mb-6 border border-purple-700/30 group-hover:bg-purple-800/50 transition-colors duration-300">
                 <Lightbulb className="h-8 w-8 text-purple-400" />
               </div>
               <h3 className="text-2xl font-bold mb-4 text-white">Our Vision</h3>
@@ -368,7 +434,7 @@ export default function AboutPage() {
               variants={itemVariants} 
               className="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-xl border border-gray-700 hover:border-purple-700/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-900/10 group"
             >
-              <div className="w-16 h-16 bg-purple-900/50 rounded-xl flex items-center justify-center mb-6 border border-gray-700 hover:border-purple-700/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-900/10 group">
+              <div className="w-16 h-16 bg-purple-900/50 rounded-xl flex items-center justify-center mb-6 border border-purple-700/30 group-hover:bg-purple-800/50 transition-colors duration-300">
                 <Rocket className="h-8 w-8 text-purple-400" />
               </div>
               <h3 className="text-xl font-bold mb-3 text-white">Innovation</h3>
@@ -381,7 +447,7 @@ export default function AboutPage() {
               variants={itemVariants} 
               className="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-xl border border-gray-700 hover:border-purple-700/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-900/10 group"
             >
-              <div className="w-16 h-16 bg-purple-900/50 rounded-xl flex items-center justify-center mb-6 border border-gray-700 hover:border-purple-700/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-900/10 group">
+              <div className="w-16 h-16 bg-purple-900/50 rounded-xl flex items-center justify-center mb-6 border border-purple-700/30 group-hover:bg-purple-800/50 transition-colors duration-300">
                 <Heart className="h-8 w-8 text-purple-400" />
               </div>
               <h3 className="text-xl font-bold mb-3 text-white">Client-Centered</h3>
@@ -394,7 +460,7 @@ export default function AboutPage() {
               variants={itemVariants} 
               className="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-xl border border-gray-700 hover:border-purple-700/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-900/10 group"
             >
-              <div className="w-16 h-16 bg-purple-900/50 rounded-xl flex items-center justify-center mb-6 border border-gray-700 hover:border-purple-700/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-900/10 group">
+              <div className="w-16 h-16 bg-purple-900/50 rounded-xl flex items-center justify-center mb-6 border border-purple-700/30 group-hover:bg-purple-800/50 transition-colors duration-300">
                 <Zap className="h-8 w-8 text-purple-400" />
               </div>
               <h3 className="text-xl font-bold mb-3 text-white">Performance</h3>
@@ -407,7 +473,7 @@ export default function AboutPage() {
               variants={itemVariants} 
               className="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-xl border border-gray-700 hover:border-purple-700/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-900/10 group"
             >
-              <div className="w-16 h-16 bg-purple-900/50 rounded-xl flex items-center justify-center mb-6 border border-gray-700 hover:border-purple-700/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-900/10 group">
+              <div className="w-16 h-16 bg-purple-900/50 rounded-xl flex items-center justify-center mb-6 border border-purple-700/30 group-hover:bg-purple-800/50 transition-colors duration-300">
                 <Shield className="h-8 w-8 text-purple-400" />
               </div>
               <h3 className="text-xl font-bold mb-3 text-white">Security</h3>
@@ -420,7 +486,7 @@ export default function AboutPage() {
               variants={itemVariants} 
               className="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-xl border border-gray-700 hover:border-purple-700/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-900/10 group"
             >
-              <div className="w-16 h-16 bg-purple-900/50 rounded-xl flex items-center justify-center mb-6 border border-gray-700 hover:border-purple-700/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-900/10 group">
+              <div className="w-16 h-16 bg-purple-900/50 rounded-xl flex items-center justify-center mb-6 border border-purple-700/30 group-hover:bg-purple-800/50 transition-colors duration-300">
                 <Award className="h-8 w-8 text-purple-400" />
               </div>
               <h3 className="text-xl font-bold mb-3 text-white">Excellence</h3>
@@ -464,12 +530,12 @@ export default function AboutPage() {
             
             <div className="flex flex-wrap justify-center gap-6">
               <Link href="/request">
-                <Button size="lg" className="bg-white text-purple-700 hover:bg-purple-50 px-8 py-6 text-lg rounded-xl shadow-lg shadow-purple-900/30 transition-all duration-300 hover:shadow-xl hover:shadow-purple-900/40">
+                <Button size="lg" className="bg-white text-purple-700 hover:bg-purple-50 px-8 py-6 text-lg rounded-xl shadow-lg shadow-purple-900/30 transition-all duration-300 hover:shadow-xl hover:shadow-purple-900/40 hover:scale-105">
                   Start Your Project
                 </Button>
               </Link>
               <Link href="/contact">
-                <Button size="lg" variant="outline" className="text-white border-white hover:bg-purple-800/30 px-8 py-6 text-lg rounded-xl shadow-lg shadow-purple-900/20 transition-all duration-300 hover:shadow-xl hover:shadow-purple-900/30">
+                <Button size="lg" variant="outline" className="text-white border-white hover:bg-purple-800/30 px-8 py-6 text-lg rounded-xl shadow-lg shadow-purple-900/20 transition-all duration-300 hover:shadow-xl hover:shadow-purple-900/30 hover:scale-105">
                   Get in Touch
                 </Button>
               </Link>

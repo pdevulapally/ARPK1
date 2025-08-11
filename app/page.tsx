@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight, Code, Zap, Shield, ChevronRight, Award, Users, Globe } from "lucide-react"
 import Spline from '@splinetool/react-spline'
 import Navbar from "@/components/navbar"
-import { HeroSection } from "@/components/ui/hero-section"
+import HeroSection from "@/components/ui/hero-section"
 import { FeatureSteps } from "@/components/ui/feature-section"
 
 export default function Home() {
@@ -52,34 +52,8 @@ export default function Home() {
       {/* Navbar Accent Line */}
       <div className="h-1 bg-gradient-to-r from-purple-600 via-violet-500 to-indigo-600 w-full" />
 
-      {/* Hero Section - with Spline 3D */}
-      <div className="relative">
-        <HeroSection
-          title="Professional Web Development"
-          titleHref="/portfolio"
-          subtitle={{
-            regular: "Transform your business with ",
-            gradient: "stunning digital experiences",
-          }}
-          description="We create high-performance websites that drive results. From concept to launch, ARPK delivers exceptional web solutions tailored to your business needs."
-          ctaText="Start Your Project"
-          ctaHref="/request"
-          secondaryCtaText="Contact Us"
-          secondaryCtaHref="/contact"
-          bottomImage={{
-            light:
-              "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/left-screen-dvpjBekyOBAr1EoMvRgjOTsrRZdTZC.png",
-            dark: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/left-screen-dvpjBekyOBAr1EoMvRgjOTsrRZdTZC.png",
-          }}
-          gridOptions={{
-            angle: 65,
-            opacity: 0.3,
-            cellSize: 50,
-            lightLineColor: "#4a4a4a",
-            darkLineColor: "#2a2a2a",
-          }}
-        />
-      </div>
+      {/* Hero Section */}
+      <HeroSection />
 
       {/* Trusted By Section */}
       <section className="py-12 bg-gray-50 dark:bg-gray-900/50 border-y border-gray-100 dark:border-gray-800 overflow-hidden">

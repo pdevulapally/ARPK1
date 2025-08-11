@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useAuth } from "@/lib/auth"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -30,7 +30,7 @@ const statusColors = {
   completed: "bg-green-500/20 text-green-500 border-green-500/50",
 }
 
-export default function DashboardPage() {
+function DashboardContent() {
   const { user } = useAuth()
   const [requests, setRequests] = useState<Request[]>([])
   const [projects, setProjects] = useState<Project[]>([])
@@ -395,5 +395,21 @@ export default function DashboardPage() {
         </Tabs>
       </div>
     </AuthGuard>
+  )
+}
+
+function LoadingFallback() {
+  return (
+    <div className="flex justify-center items-center min-h-screen">
+      <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
+    </div>
+  )
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <DashboardContent />
+    </Suspense>
   )
 }

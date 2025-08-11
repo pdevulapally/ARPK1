@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Elements } from "@stripe/react-stripe-js"
 import { getStripe } from "@/lib/stripe"
@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Loader2, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-export default function SecurePaymentPage() {
+function SecurePaymentContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { toast } = useToast()
@@ -165,5 +165,24 @@ export default function SecurePaymentPage() {
         </Elements>
       </div>
     </div>
+  )
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+        <p>Loading secure payment page...</p>
+      </div>
+    </div>
+  )
+}
+
+export default function SecurePaymentPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <SecurePaymentContent />
+    </Suspense>
   )
 }

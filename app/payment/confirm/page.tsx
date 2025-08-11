@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useStripe } from "@stripe/react-stripe-js"
 import { useToast } from "@/hooks/use-toast"
@@ -8,7 +8,7 @@ import { Loader2, CheckCircle, XCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
-export default function PaymentConfirmPage() {
+function PaymentConfirmContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const stripe = useStripe()
@@ -151,5 +151,29 @@ export default function PaymentConfirmPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-4">
+            <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+          </div>
+          <CardTitle>Loading...</CardTitle>
+          <CardDescription>Please wait while we load the payment confirmation page.</CardDescription>
+        </CardHeader>
+      </Card>
+    </div>
+  )
+}
+
+export default function PaymentConfirmPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <PaymentConfirmContent />
+    </Suspense>
   )
 }

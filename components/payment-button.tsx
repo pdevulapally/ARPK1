@@ -1,113 +1,71 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
-import { Loader2 } from "lucide-react"
-import { createCheckoutSession } from "@/app/actions/payment"
-import { TurnstileWidget, TurnstileWidgetRef } from "@/components/turnstile-widget"
+import { Loader2, CreditCard } from "lucide-react"
+import { createCheckoutSessionAction, createPaymentIntentAction } from "@/app/actions/payment"
+import { TurnstileWidget } from "./turnstile-widget"
 
 interface PaymentButtonProps {
   projectId: string
   amount: number
-  userEmail: string
   paymentType: "deposit" | "final"
-  label: string
-  className?: string
+  disabled?: boolean
+  discountCode?: string
+  discountPercentage?: number
 }
 
-export function PaymentButton({ projectId, amount, userEmail, paymentType, label, className }: PaymentButtonProps) {
+export function PaymentButton({
+  projectId,
+  amount,
+  paymentType,
+  disabled = false,
+  discountCode,
+  discountPercentage
+}: PaymentButtonProps) {
   const [loading, setLoading] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const { toast } = useToast()
-  const turnstileRef = useRef<TurnstileWidgetRef>(null)
-
-  const getCaptchaToken = async (): Promise<string | null> => {
-    if (!turnstileRef.current) {
-      console.log("turnstileRef.current is null")
-      return null
-    }
-
-    console.log("Attempting to get reCAPTCHA token...")
-    
-    try {
-      const token = turnstileRef.current.getRecaptchaToken()
-      console.log("Token retrieved:", token ? `Length: ${token.length}` : "null")
-      return token
-    } catch (error) {
-      console.error("Error getting reCAPTCHA token:", error)
-      return null
-    }
-  }
-
-  const resetCaptcha = () => {
-    if (turnstileRef.current) {
-      turnstileRef.current.resetRecaptchaWidget()
-    }
-  }
 
   const handlePayment = async () => {
-    if (loading) return
+    if (!captchaToken) {
+      toast({
+        title: "Verification Required",
+        description: "Please complete the verification",
+        variant: "destructive",
+      })
+      return
+    }
 
-    console.log("Payment button clicked, starting payment flow...")
     setLoading(true)
     try {
-      // Get CAPTCHA token
-      console.log("Getting CAPTCHA token...")
-      const captchaToken = await getCaptchaToken()
-      console.log("CAPTCHA token result:", captchaToken ? "Token received" : "No token")
-      
-      if (!captchaToken) {
-        console.log("No CAPTCHA token, showing error toast")
-        toast({
-          title: "Security Check Required",
-          description: "Please complete the reCAPTCHA security check by clicking the checkbox above before proceeding.",
-          variant: "destructive",
-        })
-        setLoading(false)
-        return
-      }
-
-      // Create checkout session
-      console.log("Creating checkout session with params:", {
+      const result = await createCheckoutSessionAction(
         projectId,
         amount,
-        userEmail,
-        paymentType,
-        tokenLength: captchaToken.length
-      })
-      
-      const result = await createCheckoutSession(
-        projectId,
-        amount,
-        userEmail,
-        paymentType,
-        captchaToken
+        discountCode,
+        discountPercentage
       )
 
-      console.log("Checkout session result:", result)
-
-      if (result && result.url) {
-        console.log("Redirecting to:", result.url)
-        window.location.href = result.url
-      } else {
-        console.log("No URL in result, showing error")
-        toast({
-          title: "Payment Error",
-          description: "Failed to create payment session",
-          variant: "destructive",
-        })
-        // Reset CAPTCHA on error
-        resetCaptcha()
+      if (result.sessionId) {
+        // Redirect to Stripe Checkout
+        const stripe = await import('@stripe/stripe-js').then(m => m.loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!))
+        if (stripe) {
+          const { error } = await stripe.redirectToCheckout({
+            sessionId: result.sessionId
+          })
+          if (error) {
+            throw error
+          }
+        }
       }
     } catch (error: any) {
       console.error("Payment error:", error)
       toast({
-        title: "Payment Error",
-        description: error.message || "An unexpected error occurred",
+        title: "Payment Failed",
+        description: error.message || "Failed to process payment",
         variant: "destructive",
       })
-      // Reset CAPTCHA on error
-      resetCaptcha()
     } finally {
       setLoading(false)
     }
@@ -115,24 +73,29 @@ export function PaymentButton({ projectId, amount, userEmail, paymentType, label
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row items-center gap-4">
-        {/* reCAPTCHA Security Widget */}
-        <div className="flex-1 w-full sm:w-auto">
-          <TurnstileWidget ref={turnstileRef} />
-        </div>
-        
-        {/* Payment Button */}
-        <div className="flex-shrink-0 w-full sm:w-auto">
-          <Button
-            onClick={handlePayment}
-            disabled={loading}
-            className={`w-full sm:w-auto ${className || ''}`}
-          >
-            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {label}
-          </Button>
-        </div>
-      </div>
+      <TurnstileWidget
+        onVerify={(token) => setCaptchaToken(token)}
+        onExpire={() => setCaptchaToken(null)}
+        onError={() => setCaptchaToken(null)}
+      />
+      
+      <Button
+        onClick={handlePayment}
+        disabled={disabled || loading || !captchaToken}
+        className="w-full max-w-xs sm:max-w-none bg-purple-600 hover:bg-purple-700 h-12 text-lg"
+      >
+        {loading ? (
+          <>
+            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            Processing...
+          </>
+        ) : (
+          <>
+            <CreditCard className="mr-2 h-5 w-5" />
+            Pay £{amount.toFixed(2)}
+          </>
+        )}
+      </Button>
     </div>
   )
 }

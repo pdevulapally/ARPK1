@@ -2,7 +2,7 @@
 
 import { initializeApp, getApps, type FirebaseApp } from "firebase/app"
 import { getAuth as getFirebaseAuth, GoogleAuthProvider, type Auth } from "firebase/auth"
-import { getFirestore, type Firestore } from "firebase/firestore"
+import { getFirestore, type Firestore, doc, getDoc } from "firebase/firestore"
 import { getStorage as getFirebaseStorage, type FirebaseStorage } from "firebase/storage"
 import type {
   Request,
@@ -257,21 +257,42 @@ export async function createProject(projectData: Omit<Project, "id" | "createdAt
 }
 
 export async function getUserProjects(userId: string) {
+  const db = getDb()
+  if (!db) throw new Error("Firestore not initialized")
+
   try {
-    const database = getDb()
-    if (!database) throw new Error("Firestore not initialized")
-
-    // Dynamically import to avoid SSR issues
-    const { collection, query, where, orderBy, getDocs } = await import("firebase/firestore")
-
-    const q = query(collection(database, "projects"), where("userId", "==", userId), orderBy("createdAt", "desc"))
+    const projectsRef = collection(db, "projects")
+    const q = query(projectsRef, where("userId", "==", userId), orderBy("createdAt", "desc"))
     const querySnapshot = await getDocs(q)
-    return querySnapshot.docs.map((doc) => ({
+    
+    return querySnapshot.docs.map(doc => ({
       id: doc.id,
-      ...doc.data(),
+      ...doc.data()
     })) as Project[]
   } catch (error) {
-    console.error("Error getting user projects:", error)
+    console.error("Error fetching user projects:", error)
+    throw error
+  }
+}
+
+export async function getProject(projectId: string) {
+  const db = getDb()
+  if (!db) throw new Error("Firestore not initialized")
+
+  try {
+    const projectRef = doc(db, "projects", projectId)
+    const projectDoc = await getDoc(projectRef)
+    
+    if (!projectDoc.exists()) {
+      return null
+    }
+    
+    return {
+      id: projectDoc.id,
+      ...projectDoc.data()
+    } as Project
+  } catch (error) {
+    console.error("Error fetching project:", error)
     throw error
   }
 }
@@ -411,7 +432,7 @@ export async function getUserPaymentReminders(userId: string) {
   }
 }
 
-export async function getDiscountCode(code: string) {
+export async function getDiscountCode(code: string, userEmail?: string) {
   try {
     const database = getDb()
     if (!database) throw new Error("Firestore not initialized")
@@ -419,9 +440,10 @@ export async function getDiscountCode(code: string) {
     // Dynamically import to avoid SSR issues
     const { collection, query, where, limit, getDocs } = await import("firebase/firestore")
 
+    const normalizedCode = code.toUpperCase().trim()
     const q = query(
       collection(database, "discountCodes"),
-      where("code", "==", code),
+      where("code", "==", normalizedCode),
       where("isActive", "==", true),
       limit(1),
     )
@@ -444,8 +466,16 @@ export async function getDiscountCode(code: string) {
       return null
     }
 
+    // Check user restrictions
+    if (!discountData.isPublic && userEmail) {
+      const allowedUsers = discountData.allowedUsers || []
+      if (!allowedUsers.includes(userEmail.toLowerCase())) {
+        return null
+      }
+    }
+
     return {
-      docId: discountDoc.id,
+      id: discountDoc.id,
       ...discountData,
     } as DiscountCode
   } catch (error) {
@@ -509,6 +539,40 @@ export async function getAllDiscountCodes() {
     })) as DiscountCode[]
   } catch (error) {
     console.error("Error getting all discount codes:", error)
+    throw error
+  }
+}
+
+export async function updateDiscountCode(discountId: string, updateData: Partial<DiscountCode>) {
+  try {
+    const database = getDb()
+    if (!database) throw new Error("Firestore not initialized")
+
+    // Dynamically import to avoid SSR issues
+    const { doc, updateDoc } = await import("firebase/firestore")
+
+    const discountRef = doc(database, "discountCodes", discountId)
+    await updateDoc(discountRef, updateData)
+    return true
+  } catch (error) {
+    console.error("Error updating discount code:", error)
+    throw error
+  }
+}
+
+export async function deleteDiscountCode(discountId: string) {
+  try {
+    const database = getDb()
+    if (!database) throw new Error("Firestore not initialized")
+
+    // Dynamically import to avoid SSR issues
+    const { doc, deleteDoc } = await import("firebase/firestore")
+
+    const discountRef = doc(database, "discountCodes", discountId)
+    await deleteDoc(discountRef)
+    return true
+  } catch (error) {
+    console.error("Error deleting discount code:", error)
     throw error
   }
 }

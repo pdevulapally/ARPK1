@@ -13,7 +13,7 @@ import { Clock, CheckCircle, AlertCircle, PauseCircle, Loader2 } from "lucide-re
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { useToast } from "@/components/ui/use-toast"
-import { handlePaymentSuccess } from "@/app/actions/payment"
+
 
 import { motion } from "framer-motion"
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar"
@@ -66,45 +66,7 @@ function DashboardContent() {
     fetchData()
   }, [user])
 
-  // Handle payment success
-  useEffect(() => {
-    const payment = searchParams.get("payment")
-    const sessionId = searchParams.get("session_id")
 
-    if (payment === "success" && sessionId) {
-      const confirmPayment = async () => {
-        try {
-          await handlePaymentSuccess(sessionId)
-
-          toast({
-            title: "Payment Successful",
-            description: "Your payment has been processed successfully.",
-            variant: "default",
-          })
-
-          // Refresh projects to show updated payment status
-          if (user) {
-            const projectsData = await getUserProjects(user.uid)
-            setProjects(projectsData)
-          }
-        } catch (error: any) {
-          toast({
-            title: "Payment Verification Error",
-            description: error.message || "Failed to verify payment",
-            variant: "destructive",
-          })
-        }
-      }
-
-      confirmPayment()
-    } else if (payment === "cancelled") {
-      toast({
-        title: "Payment Cancelled",
-        description: "Your payment was cancelled.",
-        variant: "destructive",
-      })
-    }
-  }, [searchParams, toast, user])
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -131,6 +93,7 @@ function DashboardContent() {
 
   if (error) {
     return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
       <div className="container mx-auto px-4 py-24">
         <Card className="border border-red-500/30 bg-black/60 backdrop-blur-md">
           <CardContent className="p-6">
@@ -144,44 +107,89 @@ function DashboardContent() {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
     )
   }
 
   return (
     <AuthGuard>
-      <div className="container mx-auto px-4 py-24">
-        <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+        <div className="container mx-auto px-4 py-20 sm:py-28">
+          {/* Mobile Header */}
+          <div className="mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">Dashboard</h1>
+            <p className="text-sm sm:text-base text-gray-400">Manage your website requests and projects</p>
+          </div>
 
-        <Tabs defaultValue="requests" className="space-y-8">
-          <TabsList className="bg-black/40 border border-purple-500/20">
-            <TabsTrigger value="requests">Requests</TabsTrigger>
-            <TabsTrigger value="projects">Projects</TabsTrigger>
+          <Tabs defaultValue="requests" className="space-y-6 sm:space-y-8">
+            <TabsList className="grid w-full grid-cols-2 bg-black/40 border border-purple-500/20 h-12">
+              <TabsTrigger value="requests" className="text-sm sm:text-base">Requests</TabsTrigger>
+              <TabsTrigger value="projects" className="text-sm sm:text-base">Projects</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="requests" className="space-y-6">
+            <TabsContent value="requests" className="space-y-4 sm:space-y-6">
             <Card className="border border-purple-500/30 bg-black/60 backdrop-blur-md">
-              <CardHeader>
-                <CardTitle>Website Requests</CardTitle>
-                <CardDescription>View and manage your website requests</CardDescription>
+                <CardHeader className="pb-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                      <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
+                        <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
+                          <span className="text-white font-bold text-sm">R</span>
+                        </div>
+                        Website Requests
+                      </CardTitle>
+                      <CardDescription className="text-sm mt-2">View and manage your website requests</CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="bg-purple-500/10 border-purple-500/30 text-purple-400">
+                        {requests.length} {requests.length === 1 ? 'Request' : 'Requests'}
+                      </Badge>
+                    </div>
+                  </div>
               </CardHeader>
               <CardContent>
                 {requests.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground mb-4">You haven't submitted any requests yet</p>
-                    <Button asChild className="bg-purple-600 hover:bg-purple-700">
-                      <Link href="/request">Create a Request</Link>
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span className="text-gray-400 text-2xl">📝</span>
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-300 mb-2">No Requests Yet</h3>
+                      <p className="text-muted-foreground mb-6 text-sm sm:text-base max-w-md mx-auto">
+                        You haven't submitted any website requests yet. Start your journey by creating your first request.
+                      </p>
+                      <Button asChild className="bg-purple-600 hover:bg-purple-700 w-full sm:w-auto px-8">
+                        <Link href="/request" className="flex items-center gap-2">
+                          <span>Create Your First Request</span>
+                          <span className="text-lg">→</span>
+                        </Link>
                     </Button>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {requests.map((request) => (
-                      <Card key={request.id} className="border border-purple-500/20 bg-black/40">
-                        <CardContent className="p-6">
-                          <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
-                            <div>
-                              <h3 className="text-lg font-semibold capitalize">{request.websiteType} Website</h3>
-                              <p className="text-sm text-muted-foreground">
+                      {requests.map((request, index) => (
+                        <motion.div
+                          key={request.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.3, delay: index * 0.1 }}
+                        >
+                          <Card className="border border-purple-500/20 bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-sm hover:border-purple-500/40 transition-all duration-300 group">
+                            <CardContent className="p-4 sm:p-6">
+                              {/* Header Section */}
+                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-4 gap-3">
+                                <div className="flex items-start gap-3">
+                                  <div className="w-10 h-10 bg-purple-600/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <span className="text-purple-400 font-semibold text-sm">
+                                      {request.websiteType.charAt(0).toUpperCase()}
+                                    </span>
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="text-base sm:text-lg font-semibold capitalize text-white group-hover:text-purple-300 transition-colors">
+                                      {request.websiteType} Website
+                                    </h3>
+                                    <p className="text-xs sm:text-sm text-gray-400 flex items-center gap-2 mt-1">
+                                      <span>📅</span>
                                 Submitted{" "}
                                 {formatDistanceToNow(
                                   request.createdAt &&
@@ -192,50 +200,85 @@ function DashboardContent() {
                                   { addSuffix: true },
                                 )}
                               </p>
+                                  </div>
                             </div>
                             <Badge
-                              className={`mt-2 md:mt-0 flex items-center gap-1 ${statusColors[request.status as keyof typeof statusColors]}`}
+                                  className={`flex items-center gap-1 text-xs sm:text-sm px-3 py-1 ${statusColors[request.status as keyof typeof statusColors]}`}
                             >
                               {getStatusIcon(request.status)}
                               <span className="capitalize">{request.status}</span>
                             </Badge>
                           </div>
 
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div>
-                              <p className="text-sm font-medium">Budget</p>
-                              <p className="text-sm">${request.budget}</p>
+                              {/* Details Grid */}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                                <div className="bg-gray-800/30 rounded-lg p-3 border border-gray-700/50">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="text-purple-400">💰</span>
+                                    <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Budget</p>
+                                  </div>
+                                  <p className="text-sm sm:text-base font-semibold text-white">${request.budget}</p>
+                                </div>
+                                <div className="bg-gray-800/30 rounded-lg p-3 border border-gray-700/50">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="text-purple-400">⏰</span>
+                                    <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Deadline</p>
                             </div>
-                            <div>
-                              <p className="text-sm font-medium">Deadline</p>
-                              <p className="text-sm">{new Date(request.deadline).toLocaleDateString()}</p>
+                                  <p className="text-sm sm:text-base font-semibold text-white">
+                                    {new Date(request.deadline).toLocaleDateString()}
+                                  </p>
                             </div>
                           </div>
 
+                              {/* Features Section */}
                           <div className="mb-4">
-                            <p className="text-sm font-medium mb-1">Features</p>
+                                <div className="flex items-center gap-2 mb-3">
+                                  <span className="text-purple-400">✨</span>
+                                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">Features</p>
+                                </div>
                             <div className="flex flex-wrap gap-2">
                               {request.features.map((feature) => (
-                                <Badge key={feature} variant="outline" className="capitalize">
+                                    <Badge 
+                                      key={feature} 
+                                      variant="outline" 
+                                      className="capitalize text-xs bg-purple-500/10 border-purple-500/30 text-purple-400 hover:bg-purple-500/20 transition-colors"
+                                    >
                                   {feature.replace("-", " ")}
                                 </Badge>
                               ))}
                             </div>
                           </div>
 
+                              {/* Action Section */}
                           {request.status === "pending" && (
-                            <div className="flex justify-end">
+                                <div className="flex justify-end pt-3 border-t border-gray-700/50">
                               <Button
                                 variant="outline"
                                 size="sm"
-                                className="border-purple-500/30 hover:bg-purple-900/20"
+                                    className="border-purple-500/30 hover:bg-purple-900/20 text-purple-400 hover:text-purple-300 w-full sm:w-auto"
                               >
+                                    <span className="flex items-center gap-2">
+                                      <span>✏️</span>
                                 Edit Request
+                                    </span>
                               </Button>
+                            </div>
+                          )}
+
+                              {/* Status-specific actions */}
+                              {request.status === "approved" && (
+                                <div className="flex justify-end pt-3 border-t border-gray-700/50">
+                                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                                    <span className="flex items-center gap-1">
+                                      <CheckCircle className="h-3 w-3" />
+                                      Ready to Start
+                                    </span>
+                                  </Badge>
                             </div>
                           )}
                         </CardContent>
                       </Card>
+                        </motion.div>
                     ))}
                   </div>
                 )}
@@ -243,26 +286,26 @@ function DashboardContent() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="projects" className="space-y-6">
+            <TabsContent value="projects" className="space-y-4 sm:space-y-6">
             <Card className="border border-purple-500/30 bg-black/60 backdrop-blur-md">
-              <CardHeader>
-                <CardTitle>Your Projects</CardTitle>
-                <CardDescription>Track the progress of your active projects</CardDescription>
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg sm:text-xl">Your Projects</CardTitle>
+                  <CardDescription className="text-sm">Track the progress of your active projects</CardDescription>
               </CardHeader>
               <CardContent>
                 {projects.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-muted-foreground">You don't have any active projects yet</p>
+                      <p className="text-muted-foreground text-sm sm:text-base">You don't have any active projects yet</p>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {projects.map((project) => (
                       <Card key={project.id} className="border border-purple-500/20 bg-black/40">
-                        <CardContent className="p-6">
-                          <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
+                          <CardContent className="p-4 sm:p-6">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
                             <div>
-                              <h3 className="text-lg font-semibold capitalize">{project.websiteType} Website</h3>
-                              <p className="text-sm text-muted-foreground">
+                                <h3 className="text-base sm:text-lg font-semibold capitalize">{project.websiteType} Website</h3>
+                                <p className="text-xs sm:text-sm text-muted-foreground">
                                 Started{" "}
                                 {formatDistanceToNow(
                                   project.createdAt &&
@@ -275,48 +318,24 @@ function DashboardContent() {
                               </p>
                             </div>
                             <Badge
-                              className={`mt-2 md:mt-0 ${statusColors[project.status as keyof typeof statusColors]}`}
+                                className={`text-xs sm:text-sm ${statusColors[project.status as keyof typeof statusColors]}`}
                             >
                               <span className="capitalize">{project.status}</span>
                             </Badge>
                           </div>
 
                           <div className="mb-4">
-                            <p className="text-sm font-medium">Deadline</p>
-                            <p className="text-sm">{new Date(project.deadline).toLocaleDateString()}</p>
+                              <p className="text-xs sm:text-sm font-medium text-gray-400">Deadline</p>
+                              <p className="text-sm sm:text-base">{new Date(project.deadline).toLocaleDateString()}</p>
                           </div>
 
                           <div className="space-y-4 mt-6">
+                              <div className="flex items-center justify-between">
                             <p className="text-sm font-medium">Project Progress</p>
-                            <div className="flex flex-col md:flex-row items-center gap-6">
-                              <div className="w-24 h-24">
-                                <CircularProgressbar
-                                  value={
-                                    project.status === "completed"
-                                      ? 100
-                                      : project.status === "final review"
-                                      ? 90
-                                      : project.status === "client review"
-                                      ? 75
-                                      : project.status === "in progress"
-                                      ? 50
-                                      : 25
-                                  }
-                                  strokeWidth={10}
-                                  styles={buildStyles({
-                                    pathColor: `rgba(147, 51, 234, ${
-                                      project.status === "completed" ? 1 : 0.8
-                                    })`,
-                                    trailColor: "rgba(147, 51, 234, 0.1)",
-                                    strokeLinecap: "round"
-                                  })}
-                                />
-                              </div>
-                              
-                              <div className="flex-1 space-y-2 w-full">
-                                <div className="flex justify-between text-sm">
-                                  <span className="text-muted-foreground">Progress</span>
-                                  <span className="font-medium">
+                                <Badge 
+                                  variant="outline" 
+                                  className="text-xs bg-purple-500/10 border-purple-500/30 text-purple-400"
+                                >
                                     {project.status === "completed"
                                       ? "100%"
                                       : project.status === "final review"
@@ -326,10 +345,13 @@ function DashboardContent() {
                                       : project.status === "in progress"
                                       ? "50%"
                                       : "25%"}
-                                  </span>
+                                </Badge>
                                 </div>
                                 
-                                <div className="relative h-2 w-full bg-purple-950/30 rounded-full overflow-hidden">
+                              <div className="space-y-3">
+                                {/* Progress Bar */}
+                                <div className="relative">
+                                  <div className="h-3 w-full bg-gray-800 rounded-full overflow-hidden border border-gray-700">
                                   <motion.div
                                     initial={{ width: 0 }}
                                     animate={{
@@ -344,26 +366,58 @@ function DashboardContent() {
                                           ? "50%"
                                           : "25%"
                                     }}
-                                    transition={{ duration: 0.5, ease: "easeOut" }}
-                                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-purple-600 to-purple-400 rounded-full"
-                                  />
+                                      transition={{ duration: 0.8, ease: "easeOut" }}
+                                      className="h-full bg-gradient-to-r from-purple-600 via-purple-500 to-purple-400 rounded-full relative"
+                                    >
+                                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse"></div>
+                                    </motion.div>
+                                  </div>
                                 </div>
                                 
-                                <div className="flex justify-between text-xs text-muted-foreground">
-                                  <span>Start</span>
-                                  <span className="capitalize">{project.status}</span>
-                                  <span>Completion</span>
+                                {/* Progress Steps */}
+                                <div className="grid grid-cols-5 gap-2">
+                                  {[
+                                    { label: "Start", status: "completed" },
+                                    { label: "In Progress", status: project.status === "in progress" || project.status === "client review" || project.status === "final review" || project.status === "completed" ? "completed" : "pending" },
+                                    { label: "Review", status: project.status === "client review" || project.status === "final review" || project.status === "completed" ? "completed" : "pending" },
+                                    { label: "Final", status: project.status === "final review" || project.status === "completed" ? "completed" : "pending" },
+                                    { label: "Done", status: project.status === "completed" ? "completed" : "pending" }
+                                  ].map((step, index) => (
+                                    <div key={index} className="flex flex-col items-center">
+                                      <div className={`
+                                        w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium mb-1
+                                        ${step.status === "completed" 
+                                          ? "bg-purple-600 text-white" 
+                                          : "bg-gray-700 text-gray-400 border border-gray-600"
+                                        }
+                                      `}>
+                                        {step.status === "completed" ? "✓" : index + 1}
+                                      </div>
+                                      <span className={`text-xs text-center ${step.status === "completed" ? "text-purple-400" : "text-gray-500"}`}>
+                                        {step.label}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                                
+                                {/* Current Status */}
+                                <div className="mt-4 p-3 bg-gray-800/50 rounded-lg border border-gray-700">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+                                    <span className="text-sm text-gray-300">
+                                      Current Status: <span className="font-medium text-purple-400 capitalize">{project.status}</span>
+                                    </span>
                                 </div>
                               </div>
                             </div>
                           </div>
 
-                          <div className="flex flex-col md:flex-row justify-between items-center mt-4 gap-4">
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-4 gap-4">
                             <div>
-                              <p className="text-sm font-medium">Payment Status</p>
+                                <p className="text-xs sm:text-sm font-medium text-gray-400 mb-1">Payment Status</p>
                               <Badge
                                 variant={project.depositPaid ? "default" : "outline"}
-                                className={project.depositPaid ? "bg-green-500/20 text-green-500" : ""}
+                                  className={`text-xs sm:text-sm ${project.depositPaid ? "bg-green-500/20 text-green-500" : ""}`}
                               >
                                 {project.depositPaid
                                   ? project.finalPaid
@@ -376,11 +430,14 @@ function DashboardContent() {
                             <div className="flex gap-2">
                               <Button
                                 asChild
-                                variant="outline"
-                                size="sm"
-                                className="border-purple-500/30 hover:bg-purple-900/20"
+                                size="lg"
+                                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 w-full sm:w-auto px-6 py-3"
                               >
-                                <Link href={`/dashboard/projects/${project.id}`}>View Details</Link>
+                                <Link href={`/dashboard/projects/${project.id}`} className="flex items-center gap-2">
+                                  <span>👁️</span>
+                                  <span>View Details</span>
+                                  <span>→</span>
+                                </Link>
                               </Button>
                             </div>
                           </div>
@@ -393,6 +450,7 @@ function DashboardContent() {
             </Card>
           </TabsContent>
         </Tabs>
+        </div>
       </div>
     </AuthGuard>
   )

@@ -56,6 +56,8 @@ export interface DiscountCode {
   createdAt: Timestamp | string
   isActive: boolean
   description?: string
+  isPublic: boolean
+  allowedUsers: string[]
 }
 
 export interface SubscriptionPlan {

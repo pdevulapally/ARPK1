@@ -8,8 +8,8 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  const cookieStore = cookies()
-  const defaultOpen = await cookieStore.get("sidebar_state")?.value === "true"
+  const cookieStore = await cookies()
+  const defaultOpen = cookieStore.get("sidebar_state")?.value === "true"
 
   return (
     <AuthGuard>

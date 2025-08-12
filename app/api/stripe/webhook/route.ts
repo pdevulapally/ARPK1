@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server"
-import { getStripeServer } from "@/lib/stripe"
-import * as admin from "firebase-admin"
+import { NextRequest, NextResponse } from "next/server"
+import Stripe from "stripe"
+import * as admin from 'firebase-admin'
 
 // Initialize Firebase Admin if not already initialized
 if (admin.apps.length === 0) {
@@ -14,98 +14,149 @@ if (admin.apps.length === 0) {
 }
 
 const db = admin.firestore()
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2023-10-16',
+})
 
-export async function POST(request: Request) {
-  const stripe = getStripeServer()
-  const payload = await request.text()
-  const sig = request.headers.get("stripe-signature") as string
-  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
+export async function POST(request: NextRequest) {
+  const body = await request.text()
+  const signature = request.headers.get('stripe-signature')!
 
-  let event
+  let event: Stripe.Event
+
   try {
-    if (!endpointSecret) {
-      throw new Error("Missing STRIPE_WEBHOOK_SECRET")
-    }
-    event = stripe.webhooks.constructEvent(payload, sig, endpointSecret)
-  } catch (err: any) {
-    return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 })
+    event = stripe.webhooks.constructEvent(
+      body,
+      signature,
+      process.env.STRIPE_WEBHOOK_SECRET!
+    )
+  } catch (err) {
+    console.error('Webhook signature verification failed:', err)
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
   }
 
   try {
     switch (event.type) {
-      case "checkout.session.completed": {
-        const session = event.data.object as any
-        const projectId = session?.metadata?.projectId
-        const paymentType = session?.metadata?.paymentType
+      case 'checkout.session.completed':
+        const session = event.data.object as Stripe.Checkout.Session
+        await handleCheckoutSessionCompleted(session)
+        break
 
-        if (projectId && paymentType) {
-          const projectRef = db.collection("projects").doc(projectId)
-          if (paymentType === "deposit") {
-            await projectRef.update({
-              depositPaid: true,
-              paymentStatus: "deposit_paid",
-              updatedAt: new Date(),
-            })
-          } else if (paymentType === "final") {
-            await projectRef.update({
-              finalPaid: true,
-              paymentStatus: "completed",
-              updatedAt: new Date(),
-            })
-          }
-        }
+      case 'payment_intent.succeeded':
+        const paymentIntent = event.data.object as Stripe.PaymentIntent
+        await handlePaymentIntentSucceeded(paymentIntent)
         break
-      }
-      
-      // Handle payment intent events for 3D Secure
-      case "payment_intent.succeeded": {
-        const paymentIntent = event.data.object as any
-        const projectId = paymentIntent?.metadata?.projectId
-        const paymentType = paymentIntent?.metadata?.paymentType
 
-        if (projectId && paymentType) {
-          const projectRef = db.collection("projects").doc(projectId)
-          if (paymentType === "deposit") {
-            await projectRef.update({
-              depositPaid: true,
-              paymentStatus: "deposit_paid",
-              updatedAt: new Date(),
-            })
-          } else if (paymentType === "final") {
-            await projectRef.update({
-              finalPaid: true,
-              paymentStatus: "completed",
-              updatedAt: new Date(),
-            })
-          }
-        }
-        break
-      }
-      
-      case "payment_intent.payment_failed": {
-        const paymentIntent = event.data.object as any
-        console.log("Payment failed:", paymentIntent.id, paymentIntent.last_payment_error)
-        break
-      }
-      
-      case "payment_intent.requires_action": {
-        const paymentIntent = event.data.object as any
-        console.log("Payment requires action (3D Secure):", paymentIntent.id)
-        break
-      }
-      
-      case "payment_intent.canceled": {
-        const paymentIntent = event.data.object as any
-        console.log("Payment canceled:", paymentIntent.id)
-        break
-      }
-      
       default:
-        break
+        console.log(`Unhandled event type: ${event.type}`)
     }
-  } catch (err) {
-    return NextResponse.json({ received: true, error: (err as any).message }, { status: 500 })
+
+    return NextResponse.json({ received: true })
+  } catch (error) {
+    console.error('Webhook error:', error)
+    return NextResponse.json(
+      { error: 'Webhook handler failed' },
+      { status: 500 }
+    )
+  }
+}
+
+async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
+  const projectId = session.metadata?.projectId
+  const discountCode = session.metadata?.discountCode
+  const discountPercentage = session.metadata?.discountPercentage
+
+  if (!projectId) {
+    console.error('No project ID in session metadata')
+    return
   }
 
-  return NextResponse.json({ received: true })
+  const projectRef = db.collection('projects').doc(projectId)
+  
+  // Determine payment type based on amount or other logic
+  const amount = session.amount_total || 0
+  const projectDoc = await projectRef.get()
+  const projectData = projectDoc.data()
+
+  if (!projectData) {
+    console.error('Project not found:', projectId)
+    return
+  }
+
+  // Determine if this is deposit or final payment
+  const isDeposit = !projectData.depositPaid
+  const paymentType = isDeposit ? 'deposit' : 'final'
+
+  const updateData: any = {
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  }
+
+  if (isDeposit) {
+    updateData.depositPaid = true
+    updateData.paymentStatus = 'deposit_paid'
+  } else {
+    updateData.finalPaid = true
+    updateData.paymentStatus = 'completed'
+  }
+
+  // Store discount information if applied
+  if (discountCode && discountPercentage) {
+    updateData.appliedDiscount = {
+      code: discountCode,
+      percentage: parseInt(discountPercentage),
+      appliedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }
+  }
+
+  await projectRef.update(updateData)
+  console.log(`Payment completed for project ${projectId}: ${paymentType}`)
+}
+
+async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
+  const projectId = paymentIntent.metadata?.projectId
+  const discountCode = paymentIntent.metadata?.discountCode
+  const discountPercentage = paymentIntent.metadata?.discountPercentage
+
+  if (!projectId) {
+    console.error('No project ID in payment intent metadata')
+    return
+  }
+
+  const projectRef = db.collection('projects').doc(projectId)
+  
+  const projectDoc = await projectRef.get()
+  const projectData = projectDoc.data()
+
+  if (!projectData) {
+    console.error('Project not found:', projectId)
+    return
+  }
+
+  // Determine if this is deposit or final payment
+  const isDeposit = !projectData.depositPaid
+  const paymentType = isDeposit ? 'deposit' : 'final'
+
+  const updateData: any = {
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  }
+
+  if (isDeposit) {
+    updateData.depositPaid = true
+    updateData.paymentStatus = 'deposit_paid'
+  } else {
+    updateData.finalPaid = true
+    updateData.paymentStatus = 'completed'
+  }
+
+  // Store discount information if applied
+  if (discountCode && discountPercentage) {
+    updateData.appliedDiscount = {
+      code: discountCode,
+      percentage: parseInt(discountPercentage),
+      appliedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }
+  }
+
+  await projectRef.update(updateData)
+  console.log(`Payment intent succeeded for project ${projectId}: ${paymentType}`)
 }

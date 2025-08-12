@@ -1,5 +1,5 @@
 {
-  "name": "my-v0-project",
+  "name": "website-builder",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -42,6 +42,7 @@
     "@splinetool/runtime": "latest",
     "@stripe/react-stripe-js": "^3.9.0",
     "@stripe/stripe-js": "latest",
+    "@types/pdfkit": "^0.17.2",
     "autoprefixer": "^10.4.20",
     "chart.js": "latest",
     "class-variance-authority": "^0.7.1",
@@ -58,6 +59,7 @@
     "lucide-react": "^0.454.0",
     "next": "15.2.4",
     "next-themes": "^0.4.4",
+    "pdfkit": "^0.17.1",
     "react": "^18.2.0",
     "react-chartjs-2": "latest",
     "react-circular-progressbar": "^2.2.0",

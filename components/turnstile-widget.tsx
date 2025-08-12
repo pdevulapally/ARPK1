@@ -109,12 +109,26 @@ export const TurnstileWidget = forwardRef<TurnstileWidgetRef>((props, ref) => {
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <div ref={widgetRef} className="flex justify-center" style={{ minHeight: '78px', minWidth: '302px' }} />
-      <div className="text-xs text-gray-400 text-center">
+      <div 
+        ref={widgetRef} 
+        className="flex justify-center transform scale-90 sm:scale-100" 
+        style={{ 
+          minHeight: '70px', 
+          minWidth: '272px',
+          maxWidth: '302px'
+        }} 
+      />
+      <div className="text-xs text-gray-400 text-center px-2">
         {isCompleted ? (
-          <span className="text-green-400">✓ Security check completed</span>
+          <span className="text-green-400 flex items-center gap-1">
+            <span className="w-2 h-2 bg-green-400 rounded-full"></span>
+            Security check completed
+          </span>
         ) : (
-          "Complete the security check"
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
+            Complete the security check
+          </span>
         )}
       </div>
     </div>

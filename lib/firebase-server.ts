@@ -1,6 +1,4 @@
-// This file provides placeholder functions for server components
-// These functions will be replaced by the client-side implementations at runtime
-
+import * as admin from 'firebase-admin'
 import type {
   Request,
   Project,
@@ -10,7 +8,39 @@ import type {
   SubscriptionPlan,
 } from "./firebase-types"
 
-// Placeholder functions that will be replaced by client-side implementations
+// Initialize Firebase Admin if not already initialized
+if (admin.apps.length === 0) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    }),
+  })
+}
+
+const db = admin.firestore()
+
+// Server-side Firebase functions
+export async function getProject(projectId: string): Promise<Project | null> {
+  try {
+    const projectRef = db.collection('projects').doc(projectId)
+    const projectDoc = await projectRef.get()
+    
+    if (!projectDoc.exists) {
+      return null
+    }
+    
+    return {
+      id: projectDoc.id,
+      ...projectDoc.data()
+    } as Project
+  } catch (error) {
+    console.error('Error fetching project:', error)
+    throw error
+  }
+}
+
 export async function createRequest(): Promise<string> {
   console.error("Firebase functions should not be called on the server")
   return ""
@@ -100,14 +130,3 @@ export async function getUserSubscriptions(): Promise<UserSubscription[]> {
   console.error("Firebase functions should not be called on the server")
   return []
 }
-
-export async function createUserSubscription(): Promise<string> {
-  console.error("Firebase functions should not be called on the server")
-  return ""
-}
-
-// Export null values for Firebase services
-export const db = null
-export const auth = null
-export const storage = null
-export const googleProvider = null

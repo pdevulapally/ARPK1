@@ -1,7 +1,7 @@
 "use server"
 
-import { createCheckoutSession } from "@/lib/stripe"
-import { getProject } from "@/lib/firebase"
+import { createCheckoutSession, createPaymentIntent } from "@/lib/stripe"
+import { getProject } from "@/lib/firebase-server"
 
 export async function createCheckoutSessionAction(
   projectId: string,
@@ -15,15 +15,29 @@ export async function createCheckoutSessionAction(
       throw new Error("Project not found")
     }
 
+    // Generate proper URLs with fallbacks
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 
+                   process.env.NEXT_PUBLIC_APP_URL || 
+                   process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` :
+                   (() => {
+                     throw new Error('NEXT_PUBLIC_BASE_URL or NEXT_PUBLIC_APP_URL environment variable is required')
+                   })()
+    
+    // Ensure the URL has a proper scheme
+    const normalizedBaseUrl = baseUrl.startsWith('http') ? baseUrl : `https://${baseUrl}`
+    
+    const successUrl = `${normalizedBaseUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`
+    const cancelUrl = `${normalizedBaseUrl}/dashboard/projects/${projectId}`
+
     const session = await createCheckoutSession({
-          projectId,
+      projectId,
       amount,
-      projectName: project.name,
+      projectName: `${project.websiteType} Website`,
       customerEmail: project.userEmail,
       discountCode,
       discountPercentage,
-      successUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancelUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/projects/${projectId}`,
+      successUrl,
+      cancelUrl,
     })
 
     return { sessionId: session.id }
@@ -46,9 +60,9 @@ export async function createPaymentIntentAction(
     }
 
     const paymentIntent = await createPaymentIntent({
-        projectId,
+      projectId,
       amount,
-      projectName: project.name,
+      projectName: `${project.websiteType} Website`,
       customerEmail: project.userEmail,
       discountCode,
       discountPercentage,

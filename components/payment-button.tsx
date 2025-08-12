@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2, CreditCard } from "lucide-react"
 import { createCheckoutSessionAction, createPaymentIntentAction } from "@/app/actions/payment"
-import { TurnstileWidget } from "./turnstile-widget"
+import { TurnstileWidget, type TurnstileWidgetRef } from "./turnstile-widget"
 
 interface PaymentButtonProps {
   projectId: string
@@ -27,9 +27,31 @@ export function PaymentButton({
   const [loading, setLoading] = useState(false)
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const { toast } = useToast()
+  const turnstileRef = useRef<TurnstileWidgetRef>(null)
+
+  const getCaptchaToken = async (): Promise<string | null> => {
+    if (!turnstileRef.current) {
+      return null
+    }
+    
+    try {
+      const token = turnstileRef.current.getRecaptchaToken()
+      return token
+    } catch (error) {
+      console.error("Error getting reCAPTCHA token:", error)
+      return null
+    }
+  }
+
+  const resetCaptcha = () => {
+    if (turnstileRef.current) {
+      turnstileRef.current.resetRecaptchaWidget()
+    }
+  }
 
   const handlePayment = async () => {
-    if (!captchaToken) {
+    const token = await getCaptchaToken()
+    if (!token) {
       toast({
         title: "Verification Required",
         description: "Please complete the verification",
@@ -73,17 +95,16 @@ export function PaymentButton({
 
   return (
     <div className="space-y-4">
-      <TurnstileWidget
-        onVerify={(token) => setCaptchaToken(token)}
-        onExpire={() => setCaptchaToken(null)}
-        onError={() => setCaptchaToken(null)}
-      />
+      <div className="flex justify-center">
+        <TurnstileWidget ref={turnstileRef} />
+      </div>
       
-      <Button
-        onClick={handlePayment}
-        disabled={disabled || loading || !captchaToken}
-        className="w-full max-w-xs sm:max-w-none bg-purple-600 hover:bg-purple-700 h-12 text-lg"
-      >
+      <div className="flex justify-center">
+        <Button
+          onClick={handlePayment}
+          disabled={disabled || loading}
+          className="w-full max-w-xs sm:max-w-none bg-purple-600 hover:bg-purple-700 h-12 text-lg"
+        >
         {loading ? (
           <>
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -95,7 +116,8 @@ export function PaymentButton({
             Pay £{amount.toFixed(2)}
           </>
         )}
-      </Button>
+        </Button>
+      </div>
     </div>
   )
 }

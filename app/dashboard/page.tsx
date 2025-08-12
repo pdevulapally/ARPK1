@@ -434,7 +434,6 @@ function DashboardContent() {
                                 className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 w-full sm:w-auto px-6 py-3"
                               >
                                 <Link href={`/dashboard/projects/${project.id}`} className="flex items-center gap-2">
-                                  <span>👁️</span>
                                   <span>View Details</span>
                                   <span>→</span>
                                 </Link>

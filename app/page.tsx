@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight, Code, Zap, Shield, ChevronRight, Award, Users, Globe } from "lucide-react"
 import Spline from '@splinetool/react-spline'
 import Navbar from "@/components/navbar"
-import HeroSection from "@/components/ui/hero-section"
+import ShaderShowcase from "@/components/ui/hero"
 import { FeatureSteps } from "@/components/ui/feature-section"
+import WhyArpkSection from "@/components/ui/why-arpk-section"
 
 export default function Home() {
   const features = [
@@ -53,7 +54,7 @@ export default function Home() {
       <div className="h-1 bg-gradient-to-r from-purple-600 via-violet-500 to-indigo-600 w-full" />
 
       {/* Hero Section */}
-      <HeroSection />
+      <ShaderShowcase />
 
       {/* Trusted By Section */}
       <section className="py-12 bg-gray-50 dark:bg-gray-900/50 border-y border-gray-100 dark:border-gray-800 overflow-hidden">
@@ -92,58 +93,12 @@ export default function Home() {
         <FeatureSteps 
           features={features}
           title="Our Services & Features"
-          autoPlayInterval={4000}
-          imageHeight="h-[500px]"
         />
       </section>
 
       {/* Why Choose Us Section */}
       <section className="py-24 md:py-32 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950">
-        <div className="container mx-auto px-4">
-          <div className="max-w-lg mx-auto text-center mb-16">
-            <div className="inline-block mb-2 px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-semibold uppercase tracking-wider">
-              Why ARPK
-            </div>
-            <h2 className="text-3xl md:text-5xl font-bold mb-6 text-gray-900 dark:text-white leading-tight">
-              The <span className="text-purple-600 dark:text-purple-400">ARPK</span> Difference
-            </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400">
-              What sets our work apart and why industry leaders choose to partner with us.
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8 md:gap-12">
-            <div className="text-center p-6">
-              <div className="mx-auto w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mb-6">
-                <Award className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-white">Uncompromising Quality</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Meticulous attention to detail and relentless pursuit of excellence in every project we undertake.
-              </p>
-            </div>
-            
-            <div className="text-center p-6">
-              <div className="mx-auto w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mb-6">
-                <Users className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-white">Client Partnership</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                A collaborative approach that treats your goals as our goals, ensuring alignment at every stage.
-              </p>
-            </div>
-            
-            <div className="text-center p-6">
-              <div className="mx-auto w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mb-6">
-                <Globe className="h-8 w-8 text-purple-600 dark:text-purple-400" />
-              </div>
-              <h3 className="text-xl font-bold mb-3 text-gray-900 dark:text-white">Global Expertise</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Drawing from international best practices while delivering solutions tailored to your local market.
-              </p>
-            </div>
-          </div>
-        </div>
+        <WhyArpkSection />
       </section>
 
       {/* CTA Section */}
